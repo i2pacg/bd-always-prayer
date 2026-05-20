@@ -1,19 +1,26 @@
 @font-face {
-  font-family: "Amiri Quran Local";
-  src: url("assets/fonts/amiri-quran-arabic-400.woff2") format("woff2"),
-    url("assets/fonts/amiri-quran-latin-400.woff2") format("woff2");
+  font-family: "Scheherazade New Local";
+  src: url("assets/fonts/scheherazade-new-arabic-400.woff2") format("woff2"),
+    url("assets/fonts/scheherazade-new-latin-400.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
   font-weight: 400;
 }
 
 @font-face {
-  font-family: "Amiri Local";
-  src: url("assets/fonts/amiri-arabic-400.woff2") format("woff2"),
-    url("assets/fonts/amiri-latin-400.woff2") format("woff2");
+  font-family: "Scheherazade New Local";
+  src: url("assets/fonts/scheherazade-new-arabic-500.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Scheherazade New Local";
+  src: url("assets/fonts/scheherazade-new-arabic-600.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 600;
 }
 
 @font-face {
@@ -282,9 +289,9 @@ body.palette-emerald .wallpaper {
 }
 
 .quote-stage[data-script="arabic"] .quote-text {
-  font-family: "Amiri Quran Local", "Amiri Local", "Traditional Arabic", serif;
-  font-weight: 400;
-  line-height: var(--quote-line-height, 2.05);
+  font-family: "Scheherazade New Local", "Traditional Arabic", serif;
+  font-weight: 500;
+  line-height: var(--quote-line-height, 1.82);
 }
 
 .quote-stage[data-script="latin"] .quote-text {
@@ -304,7 +311,8 @@ body.palette-emerald .wallpaper {
 }
 
 .quote-stage[data-script="arabic"] .quote-meta {
-  font-family: "Amiri Local", "Traditional Arabic", serif;
+  font-family: "Scheherazade New Local", "Traditional Arabic", serif;
+  font-weight: 500;
 }
 
 .quote-stage[data-script="latin"] .quote-meta {

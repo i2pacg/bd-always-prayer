@@ -39,7 +39,7 @@ Each entry supports:
 
 Use `lines` when a prayer, verse, or quote needs specific line endings. The renderer treats those line breaks as intentional and fits the text to the screen instead of letting the browser choose the line breaks. Use `text` for simpler entries where automatic wrapping is acceptable.
 
-Arabic entries render with Amiri Quran, with Amiri as a fallback. English and Latin-script entries render with Montserrat.
+Arabic entries render with Scheherazade New, a traditional Naskh-style Arabic font with strong shaping and diacritic support. English and Latin-script entries render with Montserrat.
 
 ## Local Preview
 
@@ -68,21 +68,6 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |
 | Background brightness | Dims or lifts the background while keeping the quote readable. |
 | Enable animation | Turns text and background motion on or off. |
-| Library mode | Uses built-in prayers plus custom prayers, or custom prayers only. |
-| Custom prayers JSON | Adds prayers from Lively Customize without rebuilding the zip. |
-
-Custom prayers use the same shape as `quotes.json`. Example:
-
-```json
-[
-  {
-    "lines": ["اللهم اجعل القرآن ربيع قلبي", "ونور صدري"],
-    "title": "دعاء",
-    "lang": "ar",
-    "dir": "rtl"
-  }
-]
-```
 
 ## Update Workflow
 

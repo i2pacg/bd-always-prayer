@@ -17,13 +17,13 @@ $RequiredFiles = @(
     "script.js",
     "quotes.json",
     "README.md",
-    "assets\fonts\amiri-arabic-400.woff2",
-    "assets\fonts\amiri-latin-400.woff2",
-    "assets\fonts\amiri-quran-arabic-400.woff2",
-    "assets\fonts\amiri-quran-latin-400.woff2",
     "assets\fonts\montserrat-latin-400.woff2",
     "assets\fonts\montserrat-latin-500.woff2",
     "assets\fonts\montserrat-latin-600.woff2",
+    "assets\fonts\scheherazade-new-arabic-400.woff2",
+    "assets\fonts\scheherazade-new-arabic-500.woff2",
+    "assets\fonts\scheherazade-new-arabic-600.woff2",
+    "assets\fonts\scheherazade-new-latin-400.woff2",
     "assets\preview\thumbnail.jpg",
     "assets\preview\preview.jpg"
 )

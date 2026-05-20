@@ -20,9 +20,7 @@ const state = {
     backgroundBrightness: 28,
     textOpacity: 0.94,
     showMetadata: true,
-    enableAnimation: true,
-    libraryMode: 0,
-    customPrayers: []
+    enableAnimation: true
   },
   activeQuotes: []
 };
@@ -75,23 +73,8 @@ async function loadQuotes() {
   return data.map(normalizeQuote);
 }
 
-function parseCustomPrayers(value) {
-  const raw = typeof value === "string" ? value.trim() : "";
-  if (!raw) {
-    return [];
-  }
-
-  const parsed = JSON.parse(raw);
-  const entries = Array.isArray(parsed) ? parsed : [parsed];
-  return entries.map(normalizeQuote);
-}
-
 function getActiveQuotes() {
-  if (state.settings.libraryMode === 1 && state.settings.customPrayers.length > 0) {
-    return state.settings.customPrayers;
-  }
-
-  return [...state.quotes, ...state.settings.customPrayers];
+  return state.quotes;
 }
 
 function refreshActiveLibrary() {
@@ -238,7 +221,7 @@ function fitQuote() {
   const minBase = hasAuthoredLines ? 10 : 16;
   const minSize = Math.max(minBase, Math.min(24, window.innerWidth * 0.026) * scale);
   const maxHeight = getAvailableHeight();
-  const lineHeight = isArabic ? 2.05 : 1.56;
+  const lineHeight = isArabic ? 1.82 : 1.56;
 
   quoteText.style.setProperty("--quote-line-height", String(lineHeight));
 
@@ -325,17 +308,6 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
       break;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);
-      break;
-    case "libraryMode":
-      state.settings.libraryMode = Math.round(toNumber(value, 0));
-      break;
-    case "customPrayers":
-      try {
-        state.settings.customPrayers = parseCustomPrayers(value);
-      } catch (error) {
-        console.warn("Custom prayers could not be parsed.", error);
-        state.settings.customPrayers = [];
-      }
       break;
     default:
       return;

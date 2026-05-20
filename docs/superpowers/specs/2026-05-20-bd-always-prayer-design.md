@@ -12,7 +12,7 @@ Quote text appears in the visual center with generous viewport padding. Text tra
 
 ## Typography
 
-Arabic text uses the Cairo font. English and Latin-script text uses Montserrat. Fonts will be bundled locally in the project so Lively can run the wallpaper without internet access.
+Arabic text uses Scheherazade New, a traditional Naskh-style font suited to Arabic-script shaping and diacritics. English and Latin-script text uses Montserrat. Fonts will be bundled locally in the project so Lively can run the wallpaper without internet access.
 
 The renderer chooses the font per quote based on explicit `lang`/`dir` fields when present, otherwise by detecting Arabic characters in the quote text.
 
@@ -85,7 +85,7 @@ Verify the page locally in a browser and through the in-app browser. Check that:
 - The background animates, moves through the curated spectrum, and remains dark/minimal.
 - Quotes rotate at the configured interval.
 - Text transitions animate smoothly.
-- Arabic renders in Cairo and RTL.
+- Arabic renders in Scheherazade New and RTL.
 - English renders in Montserrat and LTR.
 - Long entries fit centered with padding and no clipping on desktop and smaller viewports.
 - Missing or malformed `quotes.json` produces a clear error state.

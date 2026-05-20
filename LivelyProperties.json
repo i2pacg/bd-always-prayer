@@ -89,25 +89,5 @@
     "type": "checkbox",
     "help": "Turns background and text motion on or off.",
     "value": true
-  },
-  "libraryLabel": {
-    "type": "label",
-    "value": "Prayer Library"
-  },
-  "libraryMode": {
-    "type": "dropdown",
-    "value": 0,
-    "text": "Library mode",
-    "help": "Choose whether custom prayers extend or replace the built-in quotes.",
-    "items": [
-      "Built-in + custom",
-      "Custom only"
-    ]
-  },
-  "customPrayers": {
-    "text": "Custom prayers JSON",
-    "type": "textbox",
-    "help": "Paste a JSON object or array. Use lines for exact line endings: [{\"lines\":[\"line 1\",\"line 2\"],\"title\":\"Title\",\"lang\":\"ar\",\"dir\":\"rtl\"}]",
-    "value": ""
   }
 }
