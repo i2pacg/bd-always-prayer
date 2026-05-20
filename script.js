@@ -70,7 +70,8 @@ const state = {
   refreshTimer: null,
   activeQuotes: [],
   lastFocusedElement: null,
-  pendingChoice: null
+  pendingChoice: null,
+  activeEditorControl: null
 };
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
@@ -573,6 +574,98 @@ function cycleFocus(event, container) {
   }
 }
 
+function isEditableControl(element) {
+  return element instanceof HTMLInputElement
+    || element instanceof HTMLTextAreaElement
+    || element instanceof HTMLSelectElement;
+}
+
+function focusEditableControl(control, shouldSelect = false) {
+  if (!isEditableControl(control) || control.disabled || control.hidden) {
+    return;
+  }
+
+  state.activeEditorControl = control;
+  window.requestAnimationFrame(() => {
+    control.focus({ preventScroll: true });
+
+    if (shouldSelect && (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) {
+      control.select();
+    }
+  });
+}
+
+function focusPrimaryEditorField(shouldSelect = false) {
+  focusEditableControl(libraryEntryTitle, shouldSelect);
+}
+
+function restoreEditorFocus() {
+  if (!libraryPanel.hidden && isEditableControl(state.activeEditorControl) && !state.activeEditorControl.closest("[hidden]")) {
+    focusEditableControl(state.activeEditorControl);
+    return;
+  }
+
+  librarySheet.focus({ preventScroll: true });
+}
+
+function containLibraryWheel(event) {
+  if (libraryPanel.hidden || (event.target instanceof Node && libraryChoice.contains(event.target))) {
+    return;
+  }
+
+  const scrollArea = event.target instanceof Element
+    ? event.target.closest(".library-form, .library-list, textarea")
+    : null;
+
+  if (!scrollArea) {
+    event.preventDefault();
+    return;
+  }
+
+  const canScroll = scrollArea.scrollHeight > scrollArea.clientHeight;
+  if (!canScroll) {
+    event.preventDefault();
+    return;
+  }
+
+  const atTop = scrollArea.scrollTop <= 0;
+  const atBottom = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight - 1;
+
+  if ((event.deltaY < 0 && atTop) || (event.deltaY > 0 && atBottom)) {
+    event.preventDefault();
+  }
+}
+
+function installEditableFocusBridge() {
+  const editableControls = [
+    libraryEntryTitle,
+    libraryEntrySource,
+    libraryEntryLang,
+    libraryEntryDir,
+    libraryEntryLines,
+    libraryEndpointUrl
+  ];
+
+  editableControls.forEach((control) => {
+    control.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+      focusEditableControl(control);
+    }, { capture: true });
+    control.addEventListener("click", (event) => {
+      event.stopPropagation();
+      focusEditableControl(control);
+    });
+    control.addEventListener("focus", () => {
+      state.activeEditorControl = control;
+    });
+  });
+
+  librarySheet.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+  });
+  librarySheet.addEventListener("wheel", containLibraryWheel, { passive: false });
+}
+
 function getLibraryDraft() {
   const lines = getAuthoredLines(libraryEntryLines.value);
   if (lines.length === 0 || !lines.join("").trim()) {
@@ -652,6 +745,7 @@ function selectSavedPrayer(id) {
   const entry = state.savedPrayers.find((item) => item.id === id);
   if (entry) {
     fillLibraryForm(entry);
+    focusEditableControl(libraryEntryLines);
   }
 }
 
@@ -865,7 +959,7 @@ function closeLibraryChoice() {
   document.body.classList.remove("library-choice-open");
   state.pendingChoice = null;
   if (!libraryPanel.hidden) {
-    librarySheet.focus({ preventScroll: true });
+    restoreEditorFocus();
   }
 }
 
@@ -911,9 +1005,7 @@ function openLibraryPanel() {
   document.body.classList.add("library-open");
   renderLibraryList();
   renderLibraryPreview();
-  window.requestAnimationFrame(() => {
-    librarySheet.focus({ preventScroll: true });
-  });
+  window.requestAnimationFrame(() => focusPrimaryEditorField());
 }
 
 function closeLibraryPanel() {
@@ -936,7 +1028,10 @@ function initLibraryManager() {
   libraryToggle.addEventListener("click", openLibraryPanel);
   libraryBackdrop.addEventListener("click", closeLibraryPanel);
   libraryClose.addEventListener("click", closeLibraryPanel);
-  libraryNew.addEventListener("click", () => fillLibraryForm(null));
+  libraryNew.addEventListener("click", () => {
+    fillLibraryForm(null);
+    focusPrimaryEditorField(true);
+  });
   libraryDelete.addEventListener("click", deleteSelectedSavedPrayer);
   libraryDeleteAll.addEventListener("click", deleteAllSavedPrayers);
   libraryExport.addEventListener("click", exportSavedPrayers);
@@ -945,7 +1040,7 @@ function initLibraryManager() {
   libraryImportEndpoint.addEventListener("click", () => {
     libraryEndpointImport.hidden = !libraryEndpointImport.hidden;
     if (!libraryEndpointImport.hidden) {
-      libraryEndpointUrl.focus();
+      focusEditableControl(libraryEndpointUrl, true);
     }
   });
   libraryEndpointImport.addEventListener("submit", async (event) => {
@@ -969,6 +1064,7 @@ function initLibraryManager() {
     input.addEventListener("input", renderLibraryPreview);
     input.addEventListener("change", renderLibraryPreview);
   });
+  installEditableFocusBridge();
   libraryForm.addEventListener("submit", (event) => {
     event.preventDefault();
     try {

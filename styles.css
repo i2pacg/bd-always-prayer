@@ -435,6 +435,7 @@ body.library-open .library-toggle {
   padding: clamp(16px, 4vw, 42px);
   color: rgba(248, 248, 241, 0.94);
   overscroll-behavior: contain;
+  user-select: none;
 }
 
 .library-backdrop {
@@ -679,6 +680,7 @@ body.library-open .library-toggle {
   height: 36px;
   min-width: 0;
   padding: 0 11px;
+  caret-color: rgba(248, 248, 241, 0.92);
   border: 1px solid rgba(246, 246, 238, 0.12);
   border-radius: 8px;
   outline: none;
@@ -686,6 +688,8 @@ body.library-open .library-toggle {
   color: rgba(248, 248, 241, 0.9);
   font-family: "Montserrat Local", "Segoe UI", sans-serif;
   font-size: 12px;
+  pointer-events: auto;
+  user-select: text;
 }
 
 .library-endpoint-import input:focus {
@@ -781,9 +785,22 @@ body.library-open .library-toggle {
   width: 100%;
   min-height: 42px;
   padding: 10px 12px;
+  caret-color: rgba(248, 248, 241, 0.92);
   outline: none;
   font-size: 14px;
   line-height: 1.45;
+  pointer-events: auto;
+  user-select: text;
+}
+
+.library-form input,
+.library-form textarea,
+.library-endpoint-import input {
+  cursor: text;
+}
+
+.library-form select {
+  cursor: pointer;
 }
 
 .library-form textarea {
@@ -792,6 +809,7 @@ body.library-open .library-toggle {
   font-family: "Scheherazade New Local", "Montserrat Local", "Segoe UI", sans-serif;
   font-size: 18px;
   line-height: 1.7;
+  overscroll-behavior: contain;
   white-space: pre;
 }
 
