@@ -3,11 +3,43 @@ const quoteText = document.getElementById("quoteText");
 const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
+const libraryToggle = document.getElementById("libraryToggle");
+const libraryPanel = document.getElementById("libraryPanel");
+const libraryBackdrop = document.getElementById("libraryBackdrop");
+const libraryClose = document.getElementById("libraryClose");
+const libraryList = document.getElementById("libraryList");
+const libraryEmpty = document.getElementById("libraryEmpty");
+const libraryCount = document.getElementById("libraryCount");
+const libraryForm = document.getElementById("libraryForm");
+const libraryEntryId = document.getElementById("libraryEntryId");
+const libraryEntryTitle = document.getElementById("libraryEntryTitle");
+const libraryEntrySource = document.getElementById("libraryEntrySource");
+const libraryEntryLang = document.getElementById("libraryEntryLang");
+const libraryEntryDir = document.getElementById("libraryEntryDir");
+const libraryEntryLines = document.getElementById("libraryEntryLines");
+const libraryPreview = document.getElementById("libraryPreview");
+const libraryPreviewText = document.getElementById("libraryPreviewText");
+const libraryPreviewMeta = document.getElementById("libraryPreviewMeta");
+const libraryStatus = document.getElementById("libraryStatus");
+const libraryNew = document.getElementById("libraryNew");
+const libraryDelete = document.getElementById("libraryDelete");
+const libraryExport = document.getElementById("libraryExport");
+const libraryImportDefault = document.getElementById("libraryImportDefault");
+const libraryImport = document.getElementById("libraryImport");
+const libraryImportEndpoint = document.getElementById("libraryImportEndpoint");
+const libraryImportInput = document.getElementById("libraryImportInput");
+const libraryEndpointImport = document.getElementById("libraryEndpointImport");
+const libraryEndpointUrl = document.getElementById("libraryEndpointUrl");
 
 const arabicPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/;
+const localLibraryStorageKey = "bdAlwaysPrayer.localLibrary.v1";
+const legacySavedPrayersStorageKey = "bdAlwaysPrayer.savedPrayers.v1";
 
 const state = {
   quotes: [],
+  localSeedQuotes: [],
+  savedPrayers: [],
+  selectedSavedPrayerId: "",
   index: 0,
   timer: null,
   isReady: false,
@@ -33,14 +65,38 @@ const state = {
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
 
+function trimLineEdges(lines) {
+  const cleanLines = lines.map((line) => (typeof line === "string" ? line.trimEnd() : ""));
+
+  while (cleanLines.length > 0 && !cleanLines[0].trim()) {
+    cleanLines.shift();
+  }
+
+  while (cleanLines.length > 0 && !cleanLines[cleanLines.length - 1].trim()) {
+    cleanLines.pop();
+  }
+
+  return cleanLines;
+}
+
+function getAuthoredLines(value) {
+  if (Array.isArray(value)) {
+    return trimLineEdges(value);
+  }
+
+  if (typeof value === "string") {
+    return trimLineEdges(value.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n"));
+  }
+
+  return [];
+}
+
 function normalizeQuote(entry, index) {
   if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
     throw new Error(`Quote ${index + 1} must be an object.`);
   }
 
-  const authoredLines = Array.isArray(entry.lines)
-    ? entry.lines.map((line) => (typeof line === "string" ? line.trim() : "")).filter(Boolean)
-    : [];
+  const authoredLines = getAuthoredLines(entry.lines);
   const text = authoredLines.length > 0
     ? authoredLines.join("\n")
     : typeof entry.text === "string"
@@ -97,15 +153,137 @@ async function loadRemoteQuotes() {
 }
 
 async function loadQuotes() {
-  if (state.settings.dataSource !== 1) {
-    return loadLocalQuotes();
+  return state.settings.dataSource === 1 ? loadRemoteQuotes() : [];
+}
+
+function createPrayerId() {
+  return `saved-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createSeedPrayerId(index) {
+  return `local-json-${index + 1}`;
+}
+
+function hashString(value) {
+  let hash = 0;
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash = ((hash << 5) - hash + value.charCodeAt(i)) | 0;
   }
 
-  return loadRemoteQuotes();
+  return Math.abs(hash).toString(36);
+}
+
+function createImportPrayerId(entry) {
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+    return createPrayerId();
+  }
+
+  const lines = getAuthoredLines(Array.isArray(entry.lines) ? entry.lines : entry.text).join("\n");
+  const signature = [
+    typeof entry.title === "string" ? entry.title.trim() : "",
+    typeof entry.source === "string" ? entry.source.trim() : "",
+    typeof entry.lang === "string" ? entry.lang.trim() : "",
+    typeof entry.dir === "string" ? entry.dir.trim() : "",
+    lines
+  ].join("|");
+
+  return `import-${hashString(signature)}`;
+}
+
+function normalizeSavedPrayer(entry, index) {
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+    throw new Error(`Saved prayer ${index + 1} must be an object.`);
+  }
+
+  const lines = getAuthoredLines(Array.isArray(entry.lines) ? entry.lines : entry.text);
+  if (lines.length === 0 || !lines.join("").trim()) {
+    throw new Error(`Saved prayer ${index + 1} needs at least one line.`);
+  }
+
+  const id = typeof entry.id === "string" && entry.id.trim() ? entry.id.trim() : createPrayerId();
+  const lang = entry.lang === "ar" || entry.lang === "en" ? entry.lang : "";
+  const dir = entry.dir === "rtl" || entry.dir === "ltr" ? entry.dir : "";
+
+  return {
+    id,
+    title: typeof entry.title === "string" ? entry.title.trim() : "",
+    source: typeof entry.source === "string" ? entry.source.trim() : "",
+    lang,
+    dir,
+    lines,
+    createdAt: typeof entry.createdAt === "string" && entry.createdAt ? entry.createdAt : new Date().toISOString(),
+    updatedAt: typeof entry.updatedAt === "string" && entry.updatedAt ? entry.updatedAt : new Date().toISOString()
+  };
+}
+
+function savedPrayerToQuote(entry, index) {
+  return {
+    ...normalizeQuote({
+      title: entry.title,
+      source: entry.source,
+      lang: entry.lang || undefined,
+      dir: entry.dir || undefined,
+      lines: entry.lines
+    }, index),
+    savedId: entry.id
+  };
+}
+
+function quoteToSavedPrayer(quote, index) {
+  const lines = quote.hasAuthoredLines ? quote.text.split("\n") : [quote.text];
+
+  return normalizeSavedPrayer({
+    id: createSeedPrayerId(index),
+    title: quote.title,
+    source: quote.source,
+    lang: quote.lang,
+    dir: quote.dir,
+    lines
+  }, index);
+}
+
+function readSavedPrayers() {
+  try {
+    const seedEntries = state.localSeedQuotes.map(quoteToSavedPrayer);
+    const raw = window.localStorage.getItem(localLibraryStorageKey);
+    if (!raw) {
+      const legacyRaw = window.localStorage.getItem(legacySavedPrayersStorageKey);
+      if (!legacyRaw) {
+        return seedEntries;
+      }
+
+      const legacyParsed = JSON.parse(legacyRaw);
+      const legacyEntries = Array.isArray(legacyParsed)
+        ? legacyParsed
+        : legacyParsed && Array.isArray(legacyParsed.prayers)
+          ? legacyParsed.prayers
+          : [];
+      const seededIds = new Set(seedEntries.map((entry) => entry.id));
+      const legacyPrayers = legacyEntries.map(normalizeSavedPrayer).filter((entry) => !seededIds.has(entry.id));
+      return seedEntries.concat(legacyPrayers);
+    }
+
+    const parsed = JSON.parse(raw);
+    const entries = Array.isArray(parsed) ? parsed : parsed && Array.isArray(parsed.prayers) ? parsed.prayers : [];
+    return entries.map(normalizeSavedPrayer);
+  } catch (error) {
+    setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+    return [];
+  }
+}
+
+function persistSavedPrayers() {
+  window.localStorage.setItem(localLibraryStorageKey, JSON.stringify({
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    prayers: state.savedPrayers
+  }, null, 2));
 }
 
 function getActiveQuotes() {
-  return state.quotes;
+  const savedQuotes = state.savedPrayers.map(savedPrayerToQuote);
+  return state.settings.dataSource === 1 ? state.quotes.concat(savedQuotes) : savedQuotes;
 }
 
 function refreshActiveLibrary() {
@@ -115,7 +293,7 @@ function refreshActiveLibrary() {
 
   state.activeQuotes = getActiveQuotes();
   if (state.activeQuotes.length === 0) {
-    showError(new Error("No prayers are available. Add at least one custom prayer or enable the built-in library."));
+    showError(new Error("No prayers are available. Add at least one saved prayer or load a prayer source."));
     return;
   }
 
@@ -317,6 +495,306 @@ function fitQuote() {
   quoteText.style.setProperty("--quote-font-size", `${Math.floor(best)}px`);
 }
 
+function setLibraryStatus(message, isError = false) {
+  if (!libraryStatus) {
+    return;
+  }
+
+  libraryStatus.textContent = message || "";
+  libraryStatus.classList.toggle("is-error", isError);
+}
+
+function getLibraryDraft() {
+  const lines = getAuthoredLines(libraryEntryLines.value);
+  if (lines.length === 0 || !lines.join("").trim()) {
+    throw new Error("Add at least one prayer line.");
+  }
+
+  return normalizeSavedPrayer({
+    id: libraryEntryId.value,
+    title: libraryEntryTitle.value,
+    source: libraryEntrySource.value,
+    lang: libraryEntryLang.value,
+    dir: libraryEntryDir.value,
+    lines,
+    createdAt: state.savedPrayers.find((entry) => entry.id === libraryEntryId.value)?.createdAt
+  }, 0);
+}
+
+function getPrayerListTitle(entry) {
+  return entry.title || entry.source || entry.lines.find((line) => line.trim()) || "Untitled prayer";
+}
+
+function renderLibraryList() {
+  libraryList.textContent = "";
+  libraryEmpty.hidden = state.savedPrayers.length > 0;
+  libraryCount.textContent = `${state.savedPrayers.length} local`;
+  libraryDelete.classList.toggle("is-visible", Boolean(libraryEntryId.value));
+
+  state.savedPrayers.forEach((entry) => {
+    const button = document.createElement("button");
+    const title = document.createElement("span");
+    const lines = document.createElement("span");
+
+    button.type = "button";
+    button.className = entry.id === state.selectedSavedPrayerId ? "is-active" : "";
+    button.dataset.id = entry.id;
+    title.className = "library-list-title";
+    lines.className = "library-list-lines";
+    title.textContent = getPrayerListTitle(entry);
+    lines.textContent = entry.lines.join(" / ");
+
+    button.append(title, lines);
+    button.addEventListener("click", () => selectSavedPrayer(entry.id));
+    libraryList.append(button);
+  });
+}
+
+function renderLibraryPreview() {
+  const lines = getAuthoredLines(libraryEntryLines.value);
+  const text = lines.join("\n");
+  const title = libraryEntryTitle.value.trim();
+  const source = libraryEntrySource.value.trim();
+  const lang = libraryEntryLang.value;
+  const dir = libraryEntryDir.value;
+  const isArabic = lang === "ar" || dir === "rtl" || arabicPattern.test(text);
+
+  libraryPreview.dataset.script = isArabic ? "arabic" : "latin";
+  libraryPreview.dir = dir || (isArabic ? "rtl" : "ltr");
+  libraryPreview.lang = lang || (isArabic ? "ar" : "en");
+  libraryPreviewText.textContent = text;
+  libraryPreviewMeta.textContent = [title, source].filter(Boolean).join("\n");
+}
+
+function fillLibraryForm(entry) {
+  libraryEntryId.value = entry ? entry.id : "";
+  libraryEntryTitle.value = entry ? entry.title : "";
+  libraryEntrySource.value = entry ? entry.source : "";
+  libraryEntryLang.value = entry ? entry.lang : "";
+  libraryEntryDir.value = entry ? entry.dir : "";
+  libraryEntryLines.value = entry ? entry.lines.join("\n") : "";
+  state.selectedSavedPrayerId = entry ? entry.id : "";
+  setLibraryStatus(entry ? "Editing local prayer." : "New local prayer.");
+  renderLibraryPreview();
+  renderLibraryList();
+}
+
+function selectSavedPrayer(id) {
+  const entry = state.savedPrayers.find((item) => item.id === id);
+  if (entry) {
+    fillLibraryForm(entry);
+  }
+}
+
+function saveLibraryDraft() {
+  const draft = {
+    ...getLibraryDraft(),
+    updatedAt: new Date().toISOString()
+  };
+  const existingIndex = state.savedPrayers.findIndex((entry) => entry.id === draft.id);
+
+  if (existingIndex >= 0) {
+    state.savedPrayers.splice(existingIndex, 1, draft);
+  } else {
+    draft.id = createPrayerId();
+    state.savedPrayers.push(draft);
+  }
+
+  persistSavedPrayers();
+  fillLibraryForm(draft);
+  refreshActiveLibrary();
+  setLibraryStatus("Saved.");
+}
+
+function deleteSelectedSavedPrayer() {
+  const id = libraryEntryId.value;
+  if (!id) {
+    return;
+  }
+
+  const entry = state.savedPrayers.find((item) => item.id === id);
+  if (!entry || !window.confirm(`Delete "${getPrayerListTitle(entry)}"?`)) {
+    return;
+  }
+
+  state.savedPrayers = state.savedPrayers.filter((item) => item.id !== id);
+  persistSavedPrayers();
+  fillLibraryForm(state.savedPrayers[0] || null);
+  refreshActiveLibrary();
+  setLibraryStatus("Deleted.");
+}
+
+function exportSavedPrayers() {
+  const payload = JSON.stringify({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    prayers: state.savedPrayers
+  }, null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "bd-always-prayer-local-library.json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  setLibraryStatus("Exported.");
+}
+
+function importDefaultPrayers() {
+  const defaults = state.localSeedQuotes.map(quoteToSavedPrayer);
+  if (defaults.length === 0) {
+    setLibraryStatus("No default prayers found.", true);
+    return;
+  }
+
+  const byId = new Map(state.savedPrayers.map((entry) => [entry.id, entry]));
+  defaults.forEach((entry) => {
+    byId.set(entry.id, {
+      ...entry,
+      updatedAt: new Date().toISOString()
+    });
+  });
+  state.savedPrayers = Array.from(byId.values());
+  persistSavedPrayers();
+  fillLibraryForm(defaults[0]);
+  refreshActiveLibrary();
+  setLibraryStatus(`Imported ${defaults.length} default prayer${defaults.length === 1 ? "" : "s"}.`);
+}
+
+function importSavedPrayers(file) {
+  const reader = new FileReader();
+
+  reader.addEventListener("load", () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || ""));
+      importLibraryEntries(getImportEntries(parsed), "Imported");
+    } catch (error) {
+      setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+    } finally {
+      libraryImportInput.value = "";
+    }
+  });
+
+  reader.addEventListener("error", () => {
+    setLibraryStatus("Unable to read import file.", true);
+  });
+
+  reader.readAsText(file);
+}
+
+function importLibraryEntries(entries, statusPrefix) {
+  if (entries.length === 0) {
+    throw new Error("Import has no prayers.");
+  }
+
+  const imported = entries.map((entry, index) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return normalizeSavedPrayer(entry, index);
+    }
+
+    return normalizeSavedPrayer({
+      ...entry,
+      id: typeof entry.id === "string" && entry.id.trim() ? entry.id : createImportPrayerId(entry)
+    }, index);
+  });
+  const byId = new Map(state.savedPrayers.map((entry) => [entry.id, entry]));
+  imported.forEach((entry) => {
+    byId.set(entry.id, {
+      ...entry,
+      updatedAt: new Date().toISOString()
+    });
+  });
+  state.savedPrayers = Array.from(byId.values());
+  persistSavedPrayers();
+  fillLibraryForm(imported[0]);
+  refreshActiveLibrary();
+  setLibraryStatus(`${statusPrefix} ${imported.length} prayer${imported.length === 1 ? "" : "s"}.`);
+}
+
+function getImportEntries(data) {
+  return Array.isArray(data) ? data : data && Array.isArray(data.prayers) ? data.prayers : [];
+}
+
+async function importEndpointPrayers(url) {
+  const endpoint = url.trim();
+  if (!endpoint) {
+    throw new Error("Endpoint URL is empty.");
+  }
+
+  const data = await fetchJson(endpoint);
+  importLibraryEntries(getImportEntries(data), "Imported");
+  libraryEndpointImport.hidden = true;
+}
+
+function openLibraryPanel() {
+  libraryPanel.hidden = false;
+  document.body.classList.add("library-open");
+  renderLibraryList();
+  renderLibraryPreview();
+  window.requestAnimationFrame(() => libraryEntryLines.focus());
+}
+
+function closeLibraryPanel() {
+  libraryPanel.hidden = true;
+  document.body.classList.remove("library-open");
+  libraryToggle.focus();
+}
+
+function initLibraryManager() {
+  state.savedPrayers = readSavedPrayers();
+  persistSavedPrayers();
+  fillLibraryForm(state.savedPrayers[0] || null);
+
+  libraryToggle.addEventListener("click", openLibraryPanel);
+  libraryBackdrop.addEventListener("click", closeLibraryPanel);
+  libraryClose.addEventListener("click", closeLibraryPanel);
+  libraryNew.addEventListener("click", () => fillLibraryForm(null));
+  libraryDelete.addEventListener("click", deleteSelectedSavedPrayer);
+  libraryExport.addEventListener("click", exportSavedPrayers);
+  libraryImportDefault.addEventListener("click", importDefaultPrayers);
+  libraryImport.addEventListener("click", () => libraryImportInput.click());
+  libraryImportEndpoint.addEventListener("click", () => {
+    libraryEndpointImport.hidden = !libraryEndpointImport.hidden;
+    if (!libraryEndpointImport.hidden) {
+      libraryEndpointUrl.focus();
+    }
+  });
+  libraryEndpointImport.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      await importEndpointPrayers(libraryEndpointUrl.value);
+    } catch (error) {
+      setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+    }
+  });
+  libraryImportInput.addEventListener("change", () => {
+    const file = libraryImportInput.files && libraryImportInput.files[0];
+    if (file) {
+      importSavedPrayers(file);
+    }
+  });
+  [libraryEntryTitle, libraryEntrySource, libraryEntryLang, libraryEntryDir, libraryEntryLines].forEach((input) => {
+    input.addEventListener("input", renderLibraryPreview);
+    input.addEventListener("change", renderLibraryPreview);
+  });
+  libraryForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    try {
+      saveLibraryDraft();
+    } catch (error) {
+      setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+    }
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !libraryPanel.hidden) {
+      closeLibraryPanel();
+    }
+  });
+}
+
 function handleResize() {
   window.requestAnimationFrame(fitQuote);
 }
@@ -324,6 +802,8 @@ function handleResize() {
 async function start() {
   try {
     applySettings();
+    state.localSeedQuotes = await loadLocalQuotes();
+    initLibraryManager();
     state.quotes = await loadQuotes();
     showQuotes();
     window.addEventListener("resize", handleResize);
@@ -338,6 +818,9 @@ async function start() {
 async function reloadQuotes() {
   try {
     clearTimer();
+    if (state.settings.dataSource !== 1) {
+      state.localSeedQuotes = await loadLocalQuotes();
+    }
     state.quotes = await loadQuotes();
     state.index = 0;
     showQuotes();
