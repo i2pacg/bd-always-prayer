@@ -4,10 +4,21 @@ Minimal Lively Wallpaper web project that rotates prayer and reflection text ove
 
 ## Use With Lively Wallpaper
 
+No web server is required for normal Lively usage. The Python server mentioned during development is only a local preview convenience for browsers.
+
+Recommended install:
+
+1. Drag `dist/bd-always-prayer-lively.zip` into the Lively Wallpaper window.
+2. Lively imports the wallpaper into its library.
+3. Select `bd-always-prayer`.
+4. Right-click the wallpaper in Lively and choose **Customize** to edit the available settings.
+
+Folder install:
+
 1. Open Lively Wallpaper.
 2. Add a new wallpaper from this project folder.
 3. Select `index.html` as the web wallpaper entry file if prompted.
-4. Right-click the wallpaper in Lively and choose **Customize** to edit the available settings.
+4. Lively reads `LivelyInfo.json` and `LivelyProperties.json` from the same folder.
 
 ## Quote Data
 
@@ -31,6 +42,8 @@ Use `lines` when a prayer, verse, or quote needs specific line endings. The rend
 Arabic entries render with Cairo. English and Latin-script entries render with Montserrat.
 
 ## Local Preview
+
+This is only for browser testing while developing. It is not needed by Lively.
 
 Run a small local server from this folder:
 
