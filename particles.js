@@ -6,6 +6,7 @@ const particleState = {
   height: 0,
   dpr: 1,
   particles: [],
+  glyphs: [],
   raf: 0,
   lastTime: 0,
   reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -56,6 +57,19 @@ function makeParticle(index) {
   };
 }
 
+function makeGlyph(index) {
+  const side = index % 2 === 0 ? -1 : 1;
+  return {
+    index,
+    angle: Math.random() * Math.PI * 2,
+    distance: 0.18 + Math.random() * 0.28,
+    side,
+    drift: 0.000012 + Math.random() * 0.000012,
+    opacity: 0.08 + Math.random() * 0.08,
+    size: 42 + Math.random() * 54
+  };
+}
+
 function syncParticleCount() {
   const target = targetParticleCount();
   while (particleState.particles.length < target) {
@@ -64,6 +78,15 @@ function syncParticleCount() {
 
   if (particleState.particles.length > target) {
     particleState.particles.length = target;
+  }
+
+  const glyphTarget = particleState.width < 720 ? 3 : 5;
+  while (particleState.glyphs.length < glyphTarget) {
+    particleState.glyphs.push(makeGlyph(particleState.glyphs.length));
+  }
+
+  if (particleState.glyphs.length > glyphTarget) {
+    particleState.glyphs.length = glyphTarget;
   }
 }
 
@@ -85,6 +108,63 @@ function drawConnection(first, second, alpha) {
   particleContext.strokeStyle = `rgba(226, 232, 224, ${alpha})`;
   particleContext.lineWidth = 0.45;
   particleContext.stroke();
+}
+
+function drawSanctuary(centerX, centerY, elapsed) {
+  const glow = particleState.settings.glow / 100;
+  const motion = particleState.reducedMotion || !particleState.settings.enabled ? 0 : particleState.settings.motion;
+  const minSide = Math.min(particleState.width, particleState.height);
+  const time = particleState.lastTime * 0.00004 * motion;
+
+  particleContext.save();
+  particleContext.translate(centerX, centerY);
+  particleContext.rotate(time);
+  particleContext.strokeStyle = `rgba(234, 238, 226, ${0.018 + glow * 0.028})`;
+  particleContext.lineWidth = 0.75;
+
+  for (let ring = 0; ring < 3; ring += 1) {
+    const radius = minSide * (0.18 + ring * 0.065);
+    particleContext.beginPath();
+    for (let point = 0; point <= 6; point += 1) {
+      const angle = -Math.PI / 2 + point * (Math.PI * 2 / 6);
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (point === 0) {
+        particleContext.moveTo(x, y);
+      } else {
+        particleContext.lineTo(x, y);
+      }
+    }
+    particleContext.stroke();
+  }
+
+  particleContext.restore();
+
+  const verticalGradient = particleContext.createLinearGradient(centerX, centerY - minSide * 0.34, centerX, centerY + minSide * 0.34);
+  verticalGradient.addColorStop(0, "rgba(236, 240, 224, 0)");
+  verticalGradient.addColorStop(0.5, `rgba(236, 240, 224, ${0.04 + glow * 0.035})`);
+  verticalGradient.addColorStop(1, "rgba(236, 240, 224, 0)");
+  particleContext.strokeStyle = verticalGradient;
+  particleContext.lineWidth = 1;
+  particleContext.beginPath();
+  particleContext.moveTo(centerX, centerY - minSide * 0.34);
+  particleContext.lineTo(centerX, centerY + minSide * 0.34);
+  particleContext.stroke();
+
+  for (const glyph of particleState.glyphs) {
+    glyph.angle += elapsed * glyph.drift * motion * glyph.side;
+    const x = centerX + Math.cos(glyph.angle) * glyph.distance * particleState.width;
+    const y = centerY + Math.sin(glyph.angle * 0.7) * glyph.distance * particleState.height;
+    particleContext.save();
+    particleContext.translate(x, y);
+    particleContext.rotate(glyph.side * 0.08);
+    particleContext.font = `${glyph.size}px "Scheherazade New Local", serif`;
+    particleContext.textAlign = "center";
+    particleContext.textBaseline = "middle";
+    particleContext.fillStyle = `rgba(240, 238, 222, ${glyph.opacity * glow})`;
+    particleContext.fillText("الله", 0, 0);
+    particleContext.restore();
+  }
 }
 
 function updateParticle(particle, elapsed, centerX, centerY) {
@@ -119,6 +199,8 @@ function drawParticles(timestamp = 0) {
   const glow = particleState.settings.glow / 100;
   const brightness = particleState.settings.brightness / 100;
   const alphaBase = 0.13 + glow * 0.17 + brightness * 0.08;
+
+  drawSanctuary(centerX, centerY, elapsed);
 
   for (const particle of particleState.particles) {
     updateParticle(particle, elapsed, centerX, centerY);
