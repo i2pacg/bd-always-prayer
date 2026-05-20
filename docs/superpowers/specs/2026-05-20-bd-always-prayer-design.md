@@ -25,12 +25,15 @@ Each quote item supports:
 ```json
 {
   "text": "Required quote or prayer text.",
+  "lines": ["Optional author-controlled visual line endings."],
   "title": "Optional title.",
   "source": "Optional quoted-from/source text.",
   "lang": "Optional language hint such as ar or en.",
   "dir": "Optional text direction such as rtl or ltr."
 }
 ```
+
+`lines` is preferred when the author needs sentences, verses, or prayer phrases to end on specific visual lines. The renderer preserves those line breaks and fits the full block to the screen.
 
 Starter data includes the provided Arabic du'a, the Serenity Prayer excerpt, and the Surah At-Talaq verse with `title` set to `سورة الطلاق`.
 
@@ -41,7 +44,7 @@ The quote container is centered horizontally and vertically with responsive padd
 - Use a bounded text area with viewport-relative max width and max height.
 - Compute a font size for each quote that fits the available area.
 - Keep sensible minimum and maximum sizes so short entries remain elegant and long entries stay readable.
-- Preserve line breaks from the JSON data.
+- Preserve line breaks from the JSON data, especially author-controlled `lines` arrays.
 - Use RTL layout for Arabic entries and LTR layout for English entries.
 
 ## Lively Integration

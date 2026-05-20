@@ -18,12 +18,15 @@ Each entry supports:
 ```json
 {
   "text": "Required quote text.",
+  "lines": ["Optional", "author-controlled", "visual lines"],
   "title": "Optional title.",
   "source": "Optional source or quoted-from text.",
   "lang": "Optional language hint, such as ar or en.",
   "dir": "Optional text direction, such as rtl or ltr."
 }
 ```
+
+Use `lines` when a prayer, verse, or quote needs specific line endings. The renderer treats those line breaks as intentional and fits the text to the screen instead of letting the browser choose the line breaks. Use `text` for simpler entries where automatic wrapping is acceptable.
 
 Arabic entries render with Cairo. English and Latin-script entries render with Montserrat.
 

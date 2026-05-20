@@ -30,9 +30,16 @@ function normalizeQuote(entry, index) {
     throw new Error(`Quote ${index + 1} must be an object.`);
   }
 
-  const text = typeof entry.text === "string" ? entry.text.trim() : "";
+  const authoredLines = Array.isArray(entry.lines)
+    ? entry.lines.map((line) => (typeof line === "string" ? line.trim() : "")).filter(Boolean)
+    : [];
+  const text = authoredLines.length > 0
+    ? authoredLines.join("\n")
+    : typeof entry.text === "string"
+      ? entry.text.trim()
+      : "";
   if (!text) {
-    throw new Error(`Quote ${index + 1} is missing required text.`);
+    throw new Error(`Quote ${index + 1} is missing required text or lines.`);
   }
 
   const isArabic = entry.lang === "ar" || entry.dir === "rtl" || arabicPattern.test(text);
@@ -45,7 +52,8 @@ function normalizeQuote(entry, index) {
     source: typeof entry.source === "string" ? entry.source.trim() : "",
     lang,
     dir,
-    script: isArabic ? "arabic" : "latin"
+    script: isArabic ? "arabic" : "latin",
+    hasAuthoredLines: authoredLines.length > 0
   };
 }
 
@@ -86,6 +94,7 @@ function applyQuote(quote) {
   quoteStage.dataset.script = quote.script;
   quoteStage.dir = quote.dir;
   quoteStage.lang = quote.lang;
+  quoteStage.dataset.lineMode = quote.hasAuthoredLines ? "authored" : "flow";
   quoteText.textContent = quote.text;
   quoteMeta.textContent = state.settings.showMetadata ? getMetaText(quote) : "";
 }
@@ -186,7 +195,9 @@ function fitQuote() {
   const isArabic = quoteStage.dataset.script === "arabic";
   const viewportMax = Math.min(window.innerWidth * (isArabic ? 0.056 : 0.047), 64);
   const maxSize = Math.max(28, Math.min(68, viewportMax) * scale);
-  const minSize = Math.max(16, Math.min(24, window.innerWidth * 0.026) * scale);
+  const hasAuthoredLines = quoteStage.dataset.lineMode === "authored";
+  const minBase = hasAuthoredLines ? 10 : 16;
+  const minSize = Math.max(minBase, Math.min(24, window.innerWidth * 0.026) * scale);
   const maxHeight = getAvailableHeight();
   const lineHeight = isArabic ? 1.82 : 1.56;
 
