@@ -14,10 +14,16 @@ const state = {
   settings: {
     intervalSeconds: 12,
     textScale: 1,
+    backgroundMotion: 0.7,
+    paletteIntensity: 0.85,
+    paletteMode: 0,
+    textOpacity: 0.94,
     showMetadata: true,
     enableAnimation: true
   }
 };
+
+const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
 
 function normalizeQuote(entry, index) {
   if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
@@ -82,6 +88,27 @@ function applyQuote(quote) {
   quoteStage.lang = quote.lang;
   quoteText.textContent = quote.text;
   quoteMeta.textContent = state.settings.showMetadata ? getMetaText(quote) : "";
+}
+
+function applySettings() {
+  const root = document.documentElement;
+  const motionScale = Math.max(0.15, state.settings.backgroundMotion * 1.25);
+  root.style.setProperty("--motion-scale", String(motionScale));
+  root.style.setProperty("--palette-intensity", String(state.settings.paletteIntensity));
+  root.style.setProperty("--text-opacity", String(state.settings.textOpacity));
+  root.style.setProperty("--text-scale", String(state.settings.textScale));
+  root.style.setProperty("--meta-display", state.settings.showMetadata ? "block" : "none");
+
+  document.body.classList.toggle("motion-disabled", !state.settings.enableAnimation);
+  document.body.classList.toggle("background-paused", state.settings.backgroundMotion <= 0.01);
+  document.body.classList.remove(...paletteClasses);
+  document.body.classList.add(paletteClasses[state.settings.paletteMode] || paletteClasses[0]);
+
+  if (state.isReady) {
+    applyQuote(state.quotes[state.index]);
+    fitQuote();
+    restartTimer();
+  }
 }
 
 function setStageClass(className) {
@@ -190,6 +217,7 @@ function handleResize() {
 
 async function start() {
   try {
+    applySettings();
     state.quotes = await loadQuotes();
     state.isReady = true;
     errorState.hidden = true;
@@ -204,5 +232,51 @@ async function start() {
     showError(error);
   }
 }
+
+function toNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toBoolean(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  return String(value).toLowerCase() === "true";
+}
+
+window.livelyPropertyListener = function livelyPropertyListener(name, value) {
+  switch (name) {
+    case "intervalSeconds":
+      state.settings.intervalSeconds = Math.max(5, toNumber(value, 12));
+      break;
+    case "textScale":
+      state.settings.textScale = Math.max(0.7, toNumber(value, 100) / 100);
+      break;
+    case "backgroundMotion":
+      state.settings.backgroundMotion = Math.max(0, toNumber(value, 70) / 100);
+      break;
+    case "paletteIntensity":
+      state.settings.paletteIntensity = Math.max(0.2, toNumber(value, 85) / 100);
+      break;
+    case "paletteMode":
+      state.settings.paletteMode = Math.round(toNumber(value, 0));
+      break;
+    case "textOpacity":
+      state.settings.textOpacity = Math.min(1, Math.max(0.45, toNumber(value, 94) / 100));
+      break;
+    case "showMetadata":
+      state.settings.showMetadata = toBoolean(value);
+      break;
+    case "enableAnimation":
+      state.settings.enableAnimation = toBoolean(value);
+      break;
+    default:
+      return;
+  }
+
+  applySettings();
+};
 
 start();

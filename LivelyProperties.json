@@ -1,0 +1,84 @@
+{
+  "timingLabel": {
+    "type": "label",
+    "value": "Timing"
+  },
+  "intervalSeconds": {
+    "max": 60,
+    "min": 5,
+    "step": 1,
+    "text": "Quote interval (seconds)",
+    "type": "slider",
+    "help": "How long each prayer or reflection stays on screen.",
+    "value": 12
+  },
+  "textLabel": {
+    "type": "label",
+    "value": "Text"
+  },
+  "textScale": {
+    "max": 140,
+    "min": 70,
+    "step": 1,
+    "text": "Text scale",
+    "type": "slider",
+    "help": "Adjusts quote size while still fitting inside the screen.",
+    "value": 100
+  },
+  "textOpacity": {
+    "max": 100,
+    "min": 45,
+    "step": 1,
+    "text": "Text opacity",
+    "type": "slider",
+    "help": "Controls how strongly the quote appears over the background.",
+    "value": 94
+  },
+  "showMetadata": {
+    "text": "Show title/source",
+    "type": "checkbox",
+    "help": "Shows the optional title and source from quotes.json.",
+    "value": true
+  },
+  "backgroundLabel": {
+    "type": "label",
+    "value": "Background"
+  },
+  "backgroundMotion": {
+    "max": 140,
+    "min": 0,
+    "step": 1,
+    "text": "Motion intensity",
+    "type": "slider",
+    "help": "Controls how quickly the background spectrum drifts.",
+    "value": 70
+  },
+  "paletteIntensity": {
+    "max": 140,
+    "min": 20,
+    "step": 1,
+    "text": "Palette intensity",
+    "type": "slider",
+    "help": "Controls the strength of the muted color spectrum.",
+    "value": 85
+  },
+  "paletteMode": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Palette mode",
+    "help": "Selects the dark spectrum family.",
+    "items": [
+      "Calm Spectrum",
+      "Graphite",
+      "Deep Teal",
+      "Cool Violet",
+      "Smoky Emerald"
+    ]
+  },
+  "enableAnimation": {
+    "text": "Enable animation",
+    "type": "checkbox",
+    "help": "Turns background and text motion on or off.",
+    "value": true
+  }
+}

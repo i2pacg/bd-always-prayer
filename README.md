@@ -36,3 +36,18 @@ python -m http.server 4173
 ```
 
 Then open `http://localhost:4173`.
+
+## Lively Settings
+
+The wallpaper includes `LivelyProperties.json`, so these are editable from Lively's **Customize** panel.
+
+| Setting | What it changes |
+| --- | --- |
+| Quote interval | Seconds each entry stays on screen. |
+| Text scale | Overall quote size, still constrained by automatic fitting. |
+| Text opacity | Strength of the foreground text. |
+| Show title/source | Toggles optional quote metadata. |
+| Motion intensity | Speed of the background gradient drift. |
+| Palette intensity | Strength of the muted color spectrum. |
+| Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |
+| Enable animation | Turns text and background motion on or off. |
