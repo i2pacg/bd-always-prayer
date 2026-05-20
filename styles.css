@@ -77,6 +77,10 @@ body {
   font-family: "Montserrat Local", "Segoe UI", sans-serif;
 }
 
+body.library-open {
+  overflow: hidden;
+}
+
 body.palette-graphite {
   --ambient-alpha: 0.46;
 }
@@ -430,6 +434,7 @@ body.library-open .library-toggle {
   place-items: center;
   padding: clamp(16px, 4vw, 42px);
   color: rgba(248, 248, 241, 0.94);
+  overscroll-behavior: contain;
 }
 
 .library-backdrop {
@@ -456,6 +461,8 @@ body.library-open .library-toggle {
     linear-gradient(145deg, rgba(11, 14, 15, 0.94), rgba(5, 7, 8, 0.92)),
     rgba(5, 7, 8, 0.92);
   box-shadow: 0 28px 92px rgba(0, 0, 0, 0.52);
+  outline: none;
+  overscroll-behavior: contain;
 }
 
 .library-header {
@@ -541,6 +548,8 @@ body.library-open .library-toggle {
   min-height: 0;
   padding: 18px;
   border-right: 1px solid rgba(246, 246, 238, 0.09);
+  overflow: visible;
+  overscroll-behavior: contain;
 }
 
 .library-submit-row {
@@ -651,6 +660,10 @@ body.library-open .library-toggle {
   transform: translate(-50%, 0);
 }
 
+.library-clear-button {
+  color: rgba(255, 205, 192, 0.9);
+}
+
 .library-endpoint-import[hidden] {
   display: none;
 }
@@ -691,6 +704,7 @@ body.library-open .library-toggle {
   min-height: 0;
   overflow: auto;
   padding-right: 2px;
+  overscroll-behavior: contain;
 }
 
 .library-list button {
@@ -738,6 +752,8 @@ body.library-open .library-toggle {
   gap: 14px;
   min-height: 0;
   padding: 18px clamp(18px, 3vw, 28px) 20px;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .library-form label {
@@ -784,6 +800,15 @@ body.library-open .library-toggle {
 .library-form textarea:focus {
   border-color: rgba(177, 211, 204, 0.42);
   background: rgba(255, 255, 255, 0.065);
+}
+
+.library-close:focus-visible,
+.library-list button:focus-visible,
+.library-tool-button:focus-visible,
+.library-submit-row button:focus-visible,
+.library-choice button:focus-visible {
+  outline: 2px solid rgba(177, 211, 204, 0.5);
+  outline-offset: 2px;
 }
 
 .library-preview {
@@ -841,6 +866,88 @@ body.library-open .library-toggle {
 
 .library-danger:not(.is-visible) {
   display: none;
+}
+
+.library-choice[hidden] {
+  display: none;
+}
+
+.library-choice {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+.library-choice-card {
+  display: grid;
+  gap: 12px;
+  width: min(420px, 100%);
+  padding: 20px;
+  border: 1px solid rgba(246, 246, 238, 0.13);
+  border-radius: 8px;
+  background:
+    linear-gradient(145deg, rgba(15, 18, 18, 0.97), rgba(8, 10, 11, 0.96)),
+    rgba(8, 10, 11, 0.96);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.5);
+}
+
+.library-choice-card h3,
+.library-choice-card p {
+  margin: 0;
+}
+
+.library-choice-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.library-choice-card p {
+  color: rgba(236, 236, 228, 0.64);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.library-choice-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.library-choice-actions button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(246, 246, 238, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(248, 248, 241, 0.9);
+  cursor: pointer;
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.library-choice-actions button:hover,
+.library-choice-actions button:focus-visible {
+  border-color: rgba(246, 246, 238, 0.26);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+#libraryChoicePrimary {
+  border-color: rgba(177, 211, 204, 0.28);
+  background: rgba(90, 124, 118, 0.18);
+}
+
+#libraryChoicePrimary.is-danger {
+  border-color: rgba(255, 184, 164, 0.3);
+  background: rgba(128, 58, 48, 0.22);
+  color: rgba(255, 218, 208, 0.94);
 }
 
 @keyframes spectrumDrift {

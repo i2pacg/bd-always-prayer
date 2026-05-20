@@ -18,7 +18,7 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 463.8 KB <!-- /zip-size -->
+1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 465.7 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
@@ -65,6 +65,7 @@ The small top-right control opens the local library editor. On first run, it rea
 - Edit prayers that originally came from `quotes.json`.
 - Add a new local prayer.
 - Delete local prayers.
+- Clear the full local library.
 - Preserve exact visual line breaks.
 - Store optional title and source.
 - Auto-detect Arabic/RTL, with manual language and direction controls.
@@ -82,7 +83,7 @@ This storage is expected to survive normal app and machine restarts. It is still
 
 When **Prayer source** is set to bundled/local, the wallpaper rotates this editable local library. When **Prayer source** is set to remote, the remote endpoint remains the primary source and the editable local library is appended after it.
 
-The import buttons are intentionally separate: default import restores/merges the bundled `quotes.json`, file import reads JSON from the machine, and endpoint import fetches JSON from a URL and merges it into the local library.
+The import buttons are intentionally separate: default import reads bundled `quotes.json`, file import reads JSON from the machine, and endpoint import fetches JSON from a URL. Every import asks whether to replace the current local library or add to it.
 
 Static HTML cannot rewrite the packaged `quotes.json` from inside Lively. The editor reads it as the seed and then persists edits in browser storage.
 

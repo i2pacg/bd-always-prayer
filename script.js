@@ -5,6 +5,7 @@ const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
+const librarySheet = document.getElementById("librarySheet");
 const libraryBackdrop = document.getElementById("libraryBackdrop");
 const libraryClose = document.getElementById("libraryClose");
 const libraryList = document.getElementById("libraryList");
@@ -23,6 +24,7 @@ const libraryPreviewMeta = document.getElementById("libraryPreviewMeta");
 const libraryStatus = document.getElementById("libraryStatus");
 const libraryNew = document.getElementById("libraryNew");
 const libraryDelete = document.getElementById("libraryDelete");
+const libraryDeleteAll = document.getElementById("libraryDeleteAll");
 const libraryExport = document.getElementById("libraryExport");
 const libraryImportDefault = document.getElementById("libraryImportDefault");
 const libraryImport = document.getElementById("libraryImport");
@@ -30,6 +32,12 @@ const libraryImportEndpoint = document.getElementById("libraryImportEndpoint");
 const libraryImportInput = document.getElementById("libraryImportInput");
 const libraryEndpointImport = document.getElementById("libraryEndpointImport");
 const libraryEndpointUrl = document.getElementById("libraryEndpointUrl");
+const libraryChoice = document.getElementById("libraryChoice");
+const libraryChoiceTitle = document.getElementById("libraryChoiceTitle");
+const libraryChoiceMessage = document.getElementById("libraryChoiceMessage");
+const libraryChoiceCancel = document.getElementById("libraryChoiceCancel");
+const libraryChoiceSecondary = document.getElementById("libraryChoiceSecondary");
+const libraryChoicePrimary = document.getElementById("libraryChoicePrimary");
 
 const arabicPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/;
 const localLibraryStorageKey = "bdAlwaysPrayer.localLibrary.v1";
@@ -60,7 +68,9 @@ const state = {
     enableAnimation: true
   },
   refreshTimer: null,
-  activeQuotes: []
+  activeQuotes: [],
+  lastFocusedElement: null,
+  pendingChoice: null
 };
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
@@ -302,6 +312,17 @@ function refreshActiveLibrary() {
   restartTimer();
 }
 
+function syncLibraryAfterMutation() {
+  if (state.isReady) {
+    refreshActiveLibrary();
+    return;
+  }
+
+  if (getActiveQuotes().length > 0) {
+    showQuotes();
+  }
+}
+
 function showError(error) {
   state.isReady = false;
   clearTimer();
@@ -504,6 +525,54 @@ function setLibraryStatus(message, isError = false) {
   libraryStatus.classList.toggle("is-error", isError);
 }
 
+function getFocusableElements(container) {
+  return Array.from(container.querySelectorAll([
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])"
+  ].join(","))).filter((element) => {
+    if (element.hidden || element.closest("[hidden]") || element.getAttribute("aria-hidden") === "true") {
+      return false;
+    }
+
+    const style = window.getComputedStyle(element);
+    return style.display !== "none" && style.visibility !== "hidden";
+  });
+}
+
+function focusFirstIn(container, fallback = librarySheet) {
+  const first = getFocusableElements(container)[0] || fallback;
+  if (first) {
+    first.focus({ preventScroll: true });
+  }
+}
+
+function cycleFocus(event, container) {
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  const focusable = getFocusableElements(container);
+  if (focusable.length === 0) {
+    event.preventDefault();
+    container.focus({ preventScroll: true });
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus({ preventScroll: true });
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus({ preventScroll: true });
+  }
+}
+
 function getLibraryDraft() {
   const lines = getAuthoredLines(libraryEntryLines.value);
   if (lines.length === 0 || !lines.join("").trim()) {
@@ -602,7 +671,7 @@ function saveLibraryDraft() {
 
   persistSavedPrayers();
   fillLibraryForm(draft);
-  refreshActiveLibrary();
+  syncLibraryAfterMutation();
   setLibraryStatus("Saved.");
 }
 
@@ -620,8 +689,30 @@ function deleteSelectedSavedPrayer() {
   state.savedPrayers = state.savedPrayers.filter((item) => item.id !== id);
   persistSavedPrayers();
   fillLibraryForm(state.savedPrayers[0] || null);
-  refreshActiveLibrary();
+  syncLibraryAfterMutation();
   setLibraryStatus("Deleted.");
+}
+
+function deleteAllSavedPrayers() {
+  if (state.savedPrayers.length === 0) {
+    setLibraryStatus("The local library is already empty.");
+    return;
+  }
+
+  openLibraryChoice({
+    title: "Delete all local prayers?",
+    message: "This clears the editable local library on this device. You can import defaults again later.",
+    primaryLabel: "Delete all",
+    cancelLabel: "Keep",
+    isDanger: true,
+    onPrimary: () => {
+      state.savedPrayers = [];
+      persistSavedPrayers();
+      fillLibraryForm(null);
+      syncLibraryAfterMutation();
+      setLibraryStatus("Local library cleared.");
+    }
+  });
 }
 
 function exportSavedPrayers() {
@@ -650,18 +741,13 @@ function importDefaultPrayers() {
     return;
   }
 
-  const byId = new Map(state.savedPrayers.map((entry) => [entry.id, entry]));
-  defaults.forEach((entry) => {
-    byId.set(entry.id, {
-      ...entry,
-      updatedAt: new Date().toISOString()
-    });
+  askImportMode({
+    title: "Import default prayers",
+    message: `Found ${defaults.length} default prayer${defaults.length === 1 ? "" : "s"} from bundled quotes.json.`,
+    entries: defaults,
+    replaceStatus: "Replaced with",
+    addStatus: "Added"
   });
-  state.savedPrayers = Array.from(byId.values());
-  persistSavedPrayers();
-  fillLibraryForm(defaults[0]);
-  refreshActiveLibrary();
-  setLibraryStatus(`Imported ${defaults.length} default prayer${defaults.length === 1 ? "" : "s"}.`);
 }
 
 function importSavedPrayers(file) {
@@ -670,7 +756,14 @@ function importSavedPrayers(file) {
   reader.addEventListener("load", () => {
     try {
       const parsed = JSON.parse(String(reader.result || ""));
-      importLibraryEntries(getImportEntries(parsed), "Imported");
+      const entries = normalizeImportEntries(getImportEntries(parsed));
+      askImportMode({
+        title: "Import file prayers",
+        message: `Found ${entries.length} prayer${entries.length === 1 ? "" : "s"} in this file.`,
+        entries,
+        replaceStatus: "Replaced with",
+        addStatus: "Added"
+      });
     } catch (error) {
       setLibraryStatus(error instanceof Error ? error.message : String(error), true);
     } finally {
@@ -685,12 +778,12 @@ function importSavedPrayers(file) {
   reader.readAsText(file);
 }
 
-function importLibraryEntries(entries, statusPrefix) {
+function normalizeImportEntries(entries) {
   if (entries.length === 0) {
     throw new Error("Import has no prayers.");
   }
 
-  const imported = entries.map((entry, index) => {
+  return entries.map((entry, index) => {
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
       return normalizeSavedPrayer(entry, index);
     }
@@ -700,7 +793,13 @@ function importLibraryEntries(entries, statusPrefix) {
       id: typeof entry.id === "string" && entry.id.trim() ? entry.id : createImportPrayerId(entry)
     }, index);
   });
-  const byId = new Map(state.savedPrayers.map((entry) => [entry.id, entry]));
+}
+
+function importLibraryEntries(entries, statusPrefix, mode = "add") {
+  const imported = normalizeImportEntries(entries);
+  const baseEntries = mode === "replace" ? [] : state.savedPrayers;
+  const byId = new Map(baseEntries.map((entry) => [entry.id, entry]));
+
   imported.forEach((entry) => {
     byId.set(entry.id, {
       ...entry,
@@ -710,12 +809,78 @@ function importLibraryEntries(entries, statusPrefix) {
   state.savedPrayers = Array.from(byId.values());
   persistSavedPrayers();
   fillLibraryForm(imported[0]);
-  refreshActiveLibrary();
+  syncLibraryAfterMutation();
   setLibraryStatus(`${statusPrefix} ${imported.length} prayer${imported.length === 1 ? "" : "s"}.`);
 }
 
 function getImportEntries(data) {
   return Array.isArray(data) ? data : data && Array.isArray(data.prayers) ? data.prayers : [];
+}
+
+function askImportMode(options) {
+  openLibraryChoice({
+    title: options.title,
+    message: options.message,
+    primaryLabel: "Replace",
+    secondaryLabel: "Add",
+    cancelLabel: "Cancel",
+    onPrimary: () => {
+      importLibraryEntries(options.entries, options.replaceStatus || "Replaced with", "replace");
+      if (typeof options.onDone === "function") {
+        options.onDone();
+      }
+    },
+    onSecondary: () => {
+      importLibraryEntries(options.entries, options.addStatus || "Added", "add");
+      if (typeof options.onDone === "function") {
+        options.onDone();
+      }
+    }
+  });
+}
+
+function openLibraryChoice(options) {
+  state.pendingChoice = options;
+  libraryChoiceTitle.textContent = options.title;
+  libraryChoiceMessage.textContent = options.message;
+  libraryChoiceCancel.textContent = options.cancelLabel || "Cancel";
+  libraryChoicePrimary.textContent = options.primaryLabel || "Confirm";
+  libraryChoicePrimary.classList.toggle("is-danger", Boolean(options.isDanger));
+
+  if (options.secondaryLabel) {
+    libraryChoiceSecondary.hidden = false;
+    libraryChoiceSecondary.textContent = options.secondaryLabel;
+  } else {
+    libraryChoiceSecondary.hidden = true;
+    libraryChoiceSecondary.textContent = "";
+  }
+
+  libraryChoice.hidden = false;
+  document.body.classList.add("library-choice-open");
+  focusFirstIn(libraryChoice, libraryChoicePrimary);
+}
+
+function closeLibraryChoice() {
+  libraryChoice.hidden = true;
+  document.body.classList.remove("library-choice-open");
+  state.pendingChoice = null;
+  if (!libraryPanel.hidden) {
+    librarySheet.focus({ preventScroll: true });
+  }
+}
+
+function runLibraryChoice(actionName) {
+  const choice = state.pendingChoice;
+  if (!choice) {
+    closeLibraryChoice();
+    return;
+  }
+
+  const action = choice[actionName];
+  closeLibraryChoice();
+  if (typeof action === "function") {
+    action();
+  }
 }
 
 async function importEndpointPrayers(url) {
@@ -725,22 +890,42 @@ async function importEndpointPrayers(url) {
   }
 
   const data = await fetchJson(endpoint);
-  importLibraryEntries(getImportEntries(data), "Imported");
-  libraryEndpointImport.hidden = true;
+  const entries = getImportEntries(data);
+  const imported = normalizeImportEntries(entries);
+
+  askImportMode({
+    title: "Import API prayers",
+    message: `Found ${imported.length} prayer${imported.length === 1 ? "" : "s"} from this endpoint.`,
+    entries: imported,
+    replaceStatus: "Replaced with",
+    addStatus: "Added",
+    onDone: () => {
+      libraryEndpointImport.hidden = true;
+    }
+  });
 }
 
 function openLibraryPanel() {
+  state.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   libraryPanel.hidden = false;
   document.body.classList.add("library-open");
   renderLibraryList();
   renderLibraryPreview();
-  window.requestAnimationFrame(() => libraryEntryLines.focus());
+  window.requestAnimationFrame(() => {
+    librarySheet.focus({ preventScroll: true });
+  });
 }
 
 function closeLibraryPanel() {
+  if (!libraryChoice.hidden) {
+    closeLibraryChoice();
+  }
+
   libraryPanel.hidden = true;
   document.body.classList.remove("library-open");
-  libraryToggle.focus();
+  const restoreTarget = state.lastFocusedElement || libraryToggle;
+  restoreTarget.focus({ preventScroll: true });
+  state.lastFocusedElement = null;
 }
 
 function initLibraryManager() {
@@ -753,6 +938,7 @@ function initLibraryManager() {
   libraryClose.addEventListener("click", closeLibraryPanel);
   libraryNew.addEventListener("click", () => fillLibraryForm(null));
   libraryDelete.addEventListener("click", deleteSelectedSavedPrayer);
+  libraryDeleteAll.addEventListener("click", deleteAllSavedPrayers);
   libraryExport.addEventListener("click", exportSavedPrayers);
   libraryImportDefault.addEventListener("click", importDefaultPrayers);
   libraryImport.addEventListener("click", () => libraryImportInput.click());
@@ -770,6 +956,9 @@ function initLibraryManager() {
       setLibraryStatus(error instanceof Error ? error.message : String(error), true);
     }
   });
+  libraryChoiceCancel.addEventListener("click", closeLibraryChoice);
+  libraryChoicePrimary.addEventListener("click", () => runLibraryChoice("onPrimary"));
+  libraryChoiceSecondary.addEventListener("click", () => runLibraryChoice("onSecondary"));
   libraryImportInput.addEventListener("change", () => {
     const file = libraryImportInput.files && libraryImportInput.files[0];
     if (file) {
@@ -789,9 +978,26 @@ function initLibraryManager() {
     }
   });
   window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !libraryPanel.hidden) {
-      closeLibraryPanel();
+    if (libraryPanel.hidden) {
+      return;
     }
+
+    if (!libraryChoice.hidden) {
+      if (event.key === "Escape") {
+        closeLibraryChoice();
+        return;
+      }
+
+      cycleFocus(event, libraryChoice);
+      return;
+    }
+
+    if (event.key === "Escape") {
+      closeLibraryPanel();
+      return;
+    }
+
+    cycleFocus(event, librarySheet);
   });
 }
 
