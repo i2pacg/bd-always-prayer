@@ -17,10 +17,14 @@ const state = {
     backgroundMotion: 0.7,
     paletteIntensity: 0.85,
     paletteMode: 0,
+    backgroundBrightness: 28,
     textOpacity: 0.94,
     showMetadata: true,
-    enableAnimation: true
-  }
+    enableAnimation: true,
+    libraryMode: 0,
+    customPrayers: []
+  },
+  activeQuotes: []
 };
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
@@ -71,6 +75,41 @@ async function loadQuotes() {
   return data.map(normalizeQuote);
 }
 
+function parseCustomPrayers(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) {
+    return [];
+  }
+
+  const parsed = JSON.parse(raw);
+  const entries = Array.isArray(parsed) ? parsed : [parsed];
+  return entries.map(normalizeQuote);
+}
+
+function getActiveQuotes() {
+  if (state.settings.libraryMode === 1 && state.settings.customPrayers.length > 0) {
+    return state.settings.customPrayers;
+  }
+
+  return [...state.quotes, ...state.settings.customPrayers];
+}
+
+function refreshActiveLibrary() {
+  if (!state.isReady) {
+    return;
+  }
+
+  state.activeQuotes = getActiveQuotes();
+  if (state.activeQuotes.length === 0) {
+    showError(new Error("No prayers are available. Add at least one custom prayer or enable the built-in library."));
+    return;
+  }
+
+  state.index = Math.min(state.index, state.activeQuotes.length - 1);
+  renderQuote(state.index, false);
+  restartTimer();
+}
+
 function showError(error) {
   state.isReady = false;
   clearTimer();
@@ -104,6 +143,7 @@ function applySettings() {
   const motionScale = Math.max(0.15, state.settings.backgroundMotion * 1.25);
   root.style.setProperty("--motion-scale", String(motionScale));
   root.style.setProperty("--palette-intensity", String(state.settings.paletteIntensity));
+  root.style.setProperty("--background-dim", String((100 - state.settings.backgroundBrightness) / 100));
   root.style.setProperty("--text-opacity", String(state.settings.textOpacity));
   root.style.setProperty("--text-scale", String(state.settings.textScale));
   root.style.setProperty("--meta-display", state.settings.showMetadata ? "block" : "none");
@@ -114,9 +154,8 @@ function applySettings() {
   document.body.classList.add(paletteClasses[state.settings.paletteMode] || paletteClasses[0]);
 
   if (state.isReady) {
-    applyQuote(state.quotes[state.index]);
+    refreshActiveLibrary();
     fitQuote();
-    restartTimer();
   }
 }
 
@@ -126,7 +165,7 @@ function setStageClass(className) {
 }
 
 function renderQuote(nextIndex, animate = true) {
-  const quote = state.quotes[nextIndex];
+  const quote = state.activeQuotes[nextIndex];
   if (!quote) {
     return;
   }
@@ -156,16 +195,16 @@ function renderQuote(nextIndex, animate = true) {
 }
 
 function nextQuote() {
-  if (!state.isReady || state.quotes.length < 2) {
+  if (!state.isReady || state.activeQuotes.length < 2) {
     return;
   }
 
-  renderQuote((state.index + 1) % state.quotes.length);
+  renderQuote((state.index + 1) % state.activeQuotes.length);
 }
 
 function restartTimer() {
   clearTimer();
-  if (!state.isReady || state.quotes.length < 2) {
+  if (!state.isReady || state.activeQuotes.length < 2) {
     return;
   }
 
@@ -199,7 +238,7 @@ function fitQuote() {
   const minBase = hasAuthoredLines ? 10 : 16;
   const minSize = Math.max(minBase, Math.min(24, window.innerWidth * 0.026) * scale);
   const maxHeight = getAvailableHeight();
-  const lineHeight = isArabic ? 1.82 : 1.56;
+  const lineHeight = isArabic ? 2.05 : 1.56;
 
   quoteText.style.setProperty("--quote-line-height", String(lineHeight));
 
@@ -230,6 +269,7 @@ async function start() {
   try {
     applySettings();
     state.quotes = await loadQuotes();
+    state.activeQuotes = getActiveQuotes();
     state.isReady = true;
     errorState.hidden = true;
     quoteStage.hidden = false;
@@ -274,6 +314,9 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
     case "paletteMode":
       state.settings.paletteMode = Math.round(toNumber(value, 0));
       break;
+    case "backgroundBrightness":
+      state.settings.backgroundBrightness = Math.min(70, Math.max(5, toNumber(value, 28)));
+      break;
     case "textOpacity":
       state.settings.textOpacity = Math.min(1, Math.max(0.45, toNumber(value, 94) / 100));
       break;
@@ -282,6 +325,17 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
       break;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);
+      break;
+    case "libraryMode":
+      state.settings.libraryMode = Math.round(toNumber(value, 0));
+      break;
+    case "customPrayers":
+      try {
+        state.settings.customPrayers = parseCustomPrayers(value);
+      } catch (error) {
+        console.warn("Custom prayers could not be parsed.", error);
+        state.settings.customPrayers = [];
+      }
       break;
     default:
       return;

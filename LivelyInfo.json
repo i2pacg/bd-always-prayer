@@ -1,8 +1,8 @@
 {
   "AppVersion": "1.0.0.0",
   "Title": "bd-always-prayer",
-  "Thumbnail": null,
-  "Preview": null,
+  "Thumbnail": "assets/preview/thumbnail.jpg",
+  "Preview": "assets/preview/preview.jpg",
   "Desc": "A minimal prayer and reflection wallpaper with authored quote lines, local fonts, and a calm animated dark spectrum background.",
   "Author": "BuiltDifferent",
   "License": "Private",
