@@ -2,13 +2,13 @@
 
 ## Goal
 
-Create a minimal static HTML wallpaper for Lively Wallpaper named `bd-always-prayer`. The page shows centered devotional text over a dark animated monochrome gradient, rotating between entries from a required JSON data file.
+Create a minimal static HTML wallpaper for Lively Wallpaper named `bd-always-prayer`. The page shows centered devotional text over a dark animated gradient, rotating between entries from a required JSON data file.
 
 ## Visual Direction
 
-The wallpaper uses a restrained monochrome dark style: near-black background, soft grayscale glow, and subtle animated gradient movement. The design should feel quiet, elegant, and suitable as a daily desktop wallpaper. There are no decorative UI controls on the wallpaper surface.
+The wallpaper uses a restrained dark style: near-black base, soft glows, and subtle animated gradient movement. The gradient can travel through multiple color spectrums, but only through a curated low-saturation palette that preserves the chosen quiet minimalist mood. Suitable colors include muted graphite, deep teal, desaturated indigo, cool violet, smoky emerald, and soft warm gray. Bright neon, candy colors, and high-contrast rainbow effects are out of scope.
 
-Quote text appears in the visual center with generous viewport padding. Text transitions use a soft fade, slight upward motion, and blur settling into sharp text. The animation should be calm, not flashy.
+Quote text appears in the visual center with generous viewport padding. Text transitions use a soft fade, slight upward motion, and blur settling into sharp text. The background animation should feel alive but calm, with slow spectrum drift and no flashy pulses.
 
 ## Typography
 
@@ -53,6 +53,7 @@ Initial properties:
 - Rotation interval in seconds.
 - Text scale.
 - Background motion intensity.
+- Color spectrum mode or palette intensity.
 - Animation enabled/disabled.
 
 ## Files
@@ -72,7 +73,7 @@ The project will include:
 
 Verify the page locally in a browser and through the in-app browser. Check that:
 
-- The background animates and remains dark/minimal.
+- The background animates, moves through the curated spectrum, and remains dark/minimal.
 - Quotes rotate at the configured interval.
 - Text transitions animate smoothly.
 - Arabic renders in Cairo and RTL.
