@@ -7,6 +7,7 @@ const particleState = {
   dpr: 1,
   particles: [],
   glyphs: [],
+  fragments: [],
   raf: 0,
   lastTime: 0,
   reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -57,10 +58,12 @@ function makeParticle(index) {
   };
 }
 
-function makeGlyph(index) {
+function makeGlyph(index, text = "الله", script = "arabic") {
   const side = index % 2 === 0 ? -1 : 1;
   return {
     index,
+    text,
+    script,
     angle: Math.random() * Math.PI * 2,
     distance: 0.18 + Math.random() * 0.28,
     side,
@@ -68,6 +71,37 @@ function makeGlyph(index) {
     opacity: 0.08 + Math.random() * 0.08,
     size: 42 + Math.random() * 54
   };
+}
+
+function uniqueFragments(items) {
+  return [...new Set(items.map((item) => item.trim()).filter((item) => item.length > 1))];
+}
+
+function fragmentText(text, script) {
+  const lines = text.split("\n").map((line) => line.trim()).filter(Boolean);
+  if (script === "arabic") {
+    const phrases = lines.flatMap((line) => {
+      const parts = line.split(/[،؛ۖۚ.]+/).map((part) => part.trim()).filter(Boolean);
+      return parts.length > 0 ? parts : [line];
+    });
+    const words = text.split(/\s+/).filter((word) => /[\u0600-\u06ff]/.test(word) && word.length > 2);
+    return uniqueFragments([...phrases.slice(0, 4), ...words.slice(0, 7)]).slice(0, 7);
+  }
+
+  const words = text
+    .replace(/[^\p{L}\s'-]/gu, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 3);
+  return uniqueFragments(words).slice(0, 7);
+}
+
+function resetGlyphs() {
+  particleState.glyphs = [];
+  const source = particleState.fragments.length > 0 ? particleState.fragments : ["الله"];
+  const glyphTarget = particleState.width < 720 ? 3 : 5;
+  for (let index = 0; index < glyphTarget; index += 1) {
+    particleState.glyphs.push(makeGlyph(index, source[index % source.length], particleState.script || "arabic"));
+  }
 }
 
 function syncParticleCount() {
@@ -80,13 +114,8 @@ function syncParticleCount() {
     particleState.particles.length = target;
   }
 
-  const glyphTarget = particleState.width < 720 ? 3 : 5;
-  while (particleState.glyphs.length < glyphTarget) {
-    particleState.glyphs.push(makeGlyph(particleState.glyphs.length));
-  }
-
-  if (particleState.glyphs.length > glyphTarget) {
-    particleState.glyphs.length = glyphTarget;
+  if (particleState.glyphs.length === 0 || particleState.glyphs.length !== (particleState.width < 720 ? 3 : 5)) {
+    resetGlyphs();
   }
 }
 
@@ -158,11 +187,13 @@ function drawSanctuary(centerX, centerY, elapsed) {
     particleContext.save();
     particleContext.translate(x, y);
     particleContext.rotate(glyph.side * 0.08);
-    particleContext.font = `${glyph.size}px "Scheherazade New Local", serif`;
+    particleContext.font = glyph.script === "arabic"
+      ? `${glyph.size}px "Scheherazade New Local", serif`
+      : `${Math.max(12, glyph.size * 0.32)}px "Montserrat Local", sans-serif`;
     particleContext.textAlign = "center";
     particleContext.textBaseline = "middle";
     particleContext.fillStyle = `rgba(240, 238, 222, ${glyph.opacity * glow})`;
-    particleContext.fillText("الله", 0, 0);
+    particleContext.fillText(glyph.text, 0, 0);
     particleContext.restore();
   }
 }
@@ -245,6 +276,18 @@ function setParticleSettings(nextSettings) {
   syncParticleCount();
 }
 
+function setParticleQuote(quote) {
+  const text = quote && typeof quote.text === "string" ? quote.text : "";
+  const script = quote && quote.script === "latin" ? "latin" : "arabic";
+  particleState.script = script;
+  particleState.fragments = fragmentText(text, script);
+  window.bdParticlesDebug = {
+    fragments: [...particleState.fragments],
+    script
+  };
+  resetGlyphs();
+}
+
 function startParticles() {
   resizeParticles();
   window.addEventListener("resize", resizeParticles);
@@ -253,6 +296,7 @@ function startParticles() {
 
 window.bdParticles = {
   set: setParticleSettings,
+  setQuote: setParticleQuote,
   resize: resizeParticles
 };
 

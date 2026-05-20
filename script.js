@@ -121,6 +121,9 @@ function applyQuote(quote) {
   quoteStage.dataset.lineMode = quote.hasAuthoredLines ? "authored" : "flow";
   quoteText.textContent = quote.text;
   quoteMeta.textContent = state.settings.showMetadata ? getMetaText(quote) : "";
+  if (window.bdParticles) {
+    window.bdParticles.setQuote(quote);
+  }
 }
 
 function applySettings() {
