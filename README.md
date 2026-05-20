@@ -1,0 +1,38 @@
+# bd-always-prayer
+
+Minimal Lively Wallpaper web project that rotates prayer and reflection text over a calm animated dark gradient.
+
+## Use With Lively Wallpaper
+
+1. Open Lively Wallpaper.
+2. Add a new wallpaper from this project folder.
+3. Select `index.html` as the web wallpaper entry file if prompted.
+4. Right-click the wallpaper in Lively and choose **Customize** to edit the available settings.
+
+## Quote Data
+
+Quotes are loaded from `quotes.json`. The file is required; the page intentionally does not include fallback quotes.
+
+Each entry supports:
+
+```json
+{
+  "text": "Required quote text.",
+  "title": "Optional title.",
+  "source": "Optional source or quoted-from text.",
+  "lang": "Optional language hint, such as ar or en.",
+  "dir": "Optional text direction, such as rtl or ltr."
+}
+```
+
+Arabic entries render with Cairo. English and Latin-script entries render with Montserrat.
+
+## Local Preview
+
+Run a small local server from this folder:
+
+```powershell
+python -m http.server 4173
+```
+
+Then open `http://localhost:4173`.

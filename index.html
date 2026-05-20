@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>bd-always-prayer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="wallpaper" aria-live="polite">
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+      <div class="grain" aria-hidden="true"></div>
+
+      <section class="quote-stage" id="quoteStage">
+        <p class="quote-text" id="quoteText"></p>
+        <p class="quote-meta" id="quoteMeta"></p>
+      </section>
+
+      <section class="error-state" id="errorState" hidden>
+        <p class="error-title">Unable to load prayer data</p>
+        <p class="error-message" id="errorMessage"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
