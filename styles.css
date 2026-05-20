@@ -536,26 +536,28 @@ body.library-open .library-toggle {
 
 .library-list-pane {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 14px;
   min-height: 0;
   padding: 18px;
   border-right: 1px solid rgba(246, 246, 238, 0.09);
 }
 
-.library-actions,
 .library-submit-row {
   display: flex;
   gap: 8px;
 }
 
 .library-actions {
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  overflow: visible;
 }
 
 .library-actions button,
 .library-submit-row button,
-.library-icon-button,
+.library-tool-button,
 .library-form input,
 .library-form select,
 .library-form textarea {
@@ -577,32 +579,76 @@ body.library-open .library-toggle {
 
 .library-actions button:hover,
 .library-submit-row button:hover,
-.library-icon-button:hover,
+.library-tool-button:hover,
 .library-actions button:focus-visible,
 .library-submit-row button:focus-visible,
-.library-icon-button:focus-visible {
+.library-tool-button:focus-visible {
   border-color: rgba(246, 246, 238, 0.26);
   background: rgba(255, 255, 255, 0.075);
 }
 
-.library-icon-button {
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 36px;
+.library-tool-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
   height: 36px;
   min-height: 36px;
-  padding: 0;
+  padding: 0 10px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.library-icon-button svg {
-  width: 18px;
-  height: 18px;
+.library-tool-button svg {
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 1.9;
+  stroke-width: 2;
+}
+
+.library-tool-button span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-tool-button::after {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 7px);
+  z-index: 6;
+  max-width: 210px;
+  width: max-content;
+  padding: 6px 8px;
+  border: 1px solid rgba(246, 246, 238, 0.12);
+  border-radius: 6px;
+  background: rgba(8, 10, 11, 0.94);
+  color: rgba(248, 248, 241, 0.88);
+  content: attr(data-tooltip);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, -4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.library-tool-button:hover::after,
+.library-tool-button:focus-visible::after {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .library-endpoint-import[hidden] {
@@ -611,7 +657,7 @@ body.library-open .library-toggle {
 
 .library-endpoint-import {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 36px;
+  grid-template-columns: minmax(0, 1fr) 76px;
   gap: 8px;
 }
 
@@ -632,6 +678,10 @@ body.library-open .library-toggle {
 .library-endpoint-import input:focus {
   border-color: rgba(177, 211, 204, 0.42);
   background: rgba(255, 255, 255, 0.065);
+}
+
+.library-load-button {
+  padding: 0 9px;
 }
 
 .library-list {

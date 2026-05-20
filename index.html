@@ -49,49 +49,55 @@
           <div class="library-body">
             <aside class="library-list-pane" aria-label="Local prayer library">
               <div class="library-actions">
-                <button class="library-icon-button" id="libraryNew" type="button" aria-label="New local prayer" title="New local prayer">
+                <button class="library-tool-button" id="libraryNew" type="button" aria-label="New local prayer" data-tooltip="Create a new local prayer">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 5v14M5 12h14"></path>
                   </svg>
+                  <span>New</span>
                 </button>
-                <button class="library-icon-button" id="libraryExport" type="button" aria-label="Export local library" title="Export local library">
+                <button class="library-tool-button" id="libraryExport" type="button" aria-label="Export local library" data-tooltip="Export this local library as JSON">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 3v12"></path>
                     <path d="m7 10 5 5 5-5"></path>
                     <path d="M5 21h14"></path>
                   </svg>
+                  <span>Export</span>
                 </button>
-                <button class="library-icon-button" id="libraryImportDefault" type="button" aria-label="Import default prayers" title="Import default prayers">
+                <button class="library-tool-button" id="libraryImportDefault" type="button" aria-label="Import default prayers" data-tooltip="Merge bundled quotes.json defaults">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 4v6h6"></path>
                     <path d="M20 20v-6h-6"></path>
                     <path d="M20 9a8 8 0 0 0-13.5-3.5L4 8"></path>
                     <path d="M4 15a8 8 0 0 0 13.5 3.5L20 16"></path>
                   </svg>
+                  <span>Defaults</span>
                 </button>
-                <button class="library-icon-button" id="libraryImport" type="button" aria-label="Import local JSON file" title="Import local JSON file">
+                <button class="library-tool-button" id="libraryImport" type="button" aria-label="Import local JSON file" data-tooltip="Import a JSON file from this machine">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
                     <path d="M14 3v5h5"></path>
                     <path d="M12 17V9"></path>
                     <path d="m8 13 4-4 4 4"></path>
                   </svg>
+                  <span>File</span>
                 </button>
-                <button class="library-icon-button" id="libraryImportEndpoint" type="button" aria-label="Import from API endpoint" title="Import from API endpoint">
+                <button class="library-tool-button" id="libraryImportEndpoint" type="button" aria-label="Import from API endpoint" data-tooltip="Import prayers from a JSON endpoint">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M16 16.5h1.5a3.5 3.5 0 0 0 .4-7A5.6 5.6 0 0 0 7.2 7.9 4.3 4.3 0 0 0 7.5 16.5H9"></path>
                     <path d="M12 10v9"></path>
                     <path d="m8.5 13.5 3.5-3.5 3.5 3.5"></path>
                   </svg>
+                  <span>API</span>
                 </button>
                 <input id="libraryImportInput" type="file" accept="application/json,.json" hidden>
               </div>
               <form class="library-endpoint-import" id="libraryEndpointImport" hidden>
                 <input id="libraryEndpointUrl" type="url" autocomplete="off" placeholder="https://...">
-                <button class="library-icon-button" id="libraryEndpointLoad" type="submit" aria-label="Import endpoint" title="Import endpoint">
+                <button class="library-tool-button library-load-button" id="libraryEndpointLoad" type="submit" aria-label="Import endpoint" data-tooltip="Load this endpoint">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="m5 12 4 4L19 6"></path>
                   </svg>
+                  <span>Load</span>
                 </button>
               </form>
               <div class="library-list" id="libraryList"></div>
