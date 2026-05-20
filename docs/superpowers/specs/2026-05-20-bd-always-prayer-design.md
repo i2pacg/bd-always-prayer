@@ -48,13 +48,19 @@ The quote container is centered horizontally and vertically with responsive padd
 
 The project is a static web wallpaper folder with `index.html` as the entry page. It includes `LivelyProperties.json` so Lively can expose simple customization settings, using the documented `livelyPropertyListener(name, val)` hook.
 
-Initial properties:
+Configuration should be neat and editable from the Lively Wallpaper application's Customize panel. Property labels should be human-readable, grouped by purpose where Lively supports labels, and use sensible defaults and ranges so a user can tune the wallpaper without editing code.
+
+Initial editable properties:
 
 - Rotation interval in seconds.
 - Text scale.
 - Background motion intensity.
 - Color spectrum mode or palette intensity.
+- Text opacity.
+- Metadata visibility for title/source.
 - Animation enabled/disabled.
+
+The page applies Lively property changes immediately at runtime through `livelyPropertyListener`.
 
 ## Files
 
@@ -80,6 +86,7 @@ Verify the page locally in a browser and through the in-app browser. Check that:
 - English renders in Montserrat and LTR.
 - Long entries fit centered with padding and no clipping on desktop and smaller viewports.
 - Missing or malformed `quotes.json` produces a clear error state.
+- Lively customization controls appear with clear labels and update the wallpaper immediately.
 
 ## Repository
 
