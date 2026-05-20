@@ -67,3 +67,38 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Palette intensity | Strength of the muted color spectrum. |
 | Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |
 | Enable animation | Turns text and background motion on or off. |
+
+## Update Workflow
+
+Use this whenever you change the quote library, styling, Lively settings, or local fonts.
+
+1. Edit the source files:
+
+   - Quotes and line endings: `quotes.json`
+   - Lively Customize controls: `LivelyProperties.json`
+   - Lively metadata: `LivelyInfo.json`
+   - Visual style: `styles.css`
+   - Runtime behavior: `script.js`
+
+2. Rebuild the import zip:
+
+```powershell
+npm run release
+```
+
+This validates the JSON, checks `script.js`, confirms required files exist, and writes:
+
+```text
+dist/bd-always-prayer-lively.zip
+```
+
+3. Test by dragging the rebuilt zip into Lively Wallpaper.
+
+4. Commit and push:
+
+```powershell
+git status --short
+git add .
+git commit -m "Describe the wallpaper update"
+git push
+```

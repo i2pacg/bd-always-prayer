@@ -2,3 +2,4 @@
 .playwright-mcp/
 .server.*
 artifacts/
+dist/.package-staging/
