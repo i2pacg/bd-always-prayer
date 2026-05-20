@@ -4,21 +4,35 @@ Minimal Lively Wallpaper web project that rotates prayer and reflection text ove
 
 ## Use With Lively Wallpaper
 
-No web server is required for normal Lively usage. The Python server mentioned during development is only a local preview convenience for browsers.
+Two install paths. Pick based on whether you want the Lively **Customize** sliders.
 
-Recommended install:
+### Zip install (recommended - keeps the Customize panel)
 
-1. Drag `dist/bd-always-prayer-lively.zip` into the Lively Wallpaper window.
-2. Lively imports the wallpaper into its library.
-3. Select `bd-always-prayer`.
-4. Right-click the wallpaper in Lively and choose **Customize** to edit the available settings.
+1. Download the zip: <https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip>
+2. Drag the downloaded zip into the Lively Wallpaper window.
+3. Select `bd-always-prayer` from the library.
+4. Right-click the wallpaper in Lively and choose **Customize** to edit settings (palette, motion, refresh interval, etc.).
 
-Folder install:
+Updates: re-download the zip and drag again when the wallpaper code changes. Prayer text updates live without re-installing (see Remote Prayer API below).
+
+### URL install (auto-updating, no Customize panel)
+
+Lively's **Add Wallpaper -> URL** field accepts a webpage as a wallpaper. Paste:
+
+```text
+https://i2pacg.github.io/bd-always-prayer/
+```
+
+The wallpaper code auto-updates on every page load - no re-install when the visuals change. Tradeoff: Lively does not read `LivelyProperties.json` from a URL wallpaper, so the Customize sliders are not available on this path. Defaults from `script.js` are used.
+
+### Folder install (development)
 
 1. Open Lively Wallpaper.
 2. Add a new wallpaper from this project folder.
 3. Select `index.html` as the web wallpaper entry file if prompted.
 4. Lively reads `LivelyInfo.json` and `LivelyProperties.json` from the same folder.
+
+No web server is required for normal Lively usage. The Python server mentioned later is only a local preview convenience for browsers.
 
 ## Quote Data
 
@@ -67,7 +81,9 @@ The endpoint can return either the raw array used by `quotes.json` or this wrapp
 }
 ```
 
-If `Fallback to local quotes` is disabled and the remote endpoint fails, the wallpaper shows a clear error state.
+If the remote endpoint fails, the wallpaper shows a clear error state. There is no silent fallback to local quotes.
+
+The endpoint must send `Access-Control-Allow-Origin: *` (and ideally `Cache-Control: no-cache`) so the Lively wallpaper, which loads from `file://`, can fetch it. A ready-to-use `server/.htaccess` is included in this repo - drop it next to `quotes.json` on the host serving the endpoint.
 
 ## Local Preview
 
@@ -94,7 +110,6 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Prayer source | Uses bundled `quotes.json` or a remote endpoint. |
 | Remote endpoint URL | URL for the remote prayers JSON endpoint. |
 | Remote refresh minutes | Reloads the remote endpoint periodically. Use `0` to disable. |
-| Fallback to local quotes | Uses bundled quotes if the remote endpoint fails. |
 | Motion intensity | Speed of the background gradient drift. |
 | Palette intensity | Strength of the muted color spectrum. |
 | Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |

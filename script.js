@@ -25,7 +25,6 @@ const state = {
     dataSource: 0,
     remoteEndpoint: "https://prayer.ibrahimomer.net/quotes.json",
     remoteRefreshMinutes: 15,
-    fallbackToLocal: false,
     enableAnimation: true
   },
   refreshTimer: null,
@@ -102,15 +101,7 @@ async function loadQuotes() {
     return loadLocalQuotes();
   }
 
-  try {
-    return await loadRemoteQuotes();
-  } catch (error) {
-    if (state.settings.fallbackToLocal) {
-      return loadLocalQuotes();
-    }
-
-    throw error;
-  }
+  return loadRemoteQuotes();
 }
 
 function getActiveQuotes() {
@@ -414,13 +405,6 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
     case "remoteRefreshMinutes":
       state.settings.remoteRefreshMinutes = Math.max(0, toNumber(value, 15));
       restartRefreshTimer();
-      break;
-    case "fallbackToLocal":
-      state.settings.fallbackToLocal = toBoolean(value);
-      if (state.settings.dataSource === 1) {
-        reloadQuotes();
-        return;
-      }
       break;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);

@@ -69,12 +69,6 @@
     "help": "How often to reload the remote endpoint. Use 0 to disable automatic refresh.",
     "value": 15
   },
-  "fallbackToLocal": {
-    "text": "Fallback to local quotes",
-    "type": "checkbox",
-    "help": "If the remote endpoint fails, use bundled quotes.json instead of showing an error.",
-    "value": false
-  },
   "backgroundLabel": {
     "type": "label",
     "value": "Background"

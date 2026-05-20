@@ -1,5 +1,7 @@
 .superpowers/
 .playwright-mcp/
 .server.*
+.claude/
 artifacts/
 dist/.package-staging/
+*.tmp

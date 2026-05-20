@@ -1,0 +1,24 @@
+# Drop this file next to quotes.json on prayer.ibrahimomer.net.
+# LiteSpeed reads Apache .htaccess natively, so this works on either.
+
+<IfModule mod_headers.c>
+    # CORS: allow the Lively wallpaper (file:// origin) to fetch the JSON.
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+
+    # No caching: the wallpaper polls on a schedule and must always see the
+    # current file. Without this, edge caches and the browser can serve a
+    # stale 200 for hours after you update quotes.json.
+    <FilesMatch "\.json$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+</IfModule>
+
+# Preflight short-circuit: respond 204 immediately so OPTIONS never falls
+# through to a handler that might strip the CORS headers.
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^ - [R=204,L]
