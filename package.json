@@ -6,7 +6,9 @@
   "scripts": {
     "validate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lively.ps1 -ValidateOnly",
     "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lively.ps1",
-    "release": "npm run package"
+    "release": "npm run package",
+    "ship": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1",
+    "ship:offline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1 -SkipRemoteProbe -SkipPagesProbe"
   },
   "devDependencies": {}
 }

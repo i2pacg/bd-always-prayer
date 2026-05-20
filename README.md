@@ -1,154 +1,160 @@
 # bd-always-prayer
 
-Minimal Lively Wallpaper web project that rotates prayer and reflection text over a calm animated dark gradient.
+[![Live preview](https://img.shields.io/badge/preview-live-2ea44f?logo=github)](https://i2pacg.github.io/bd-always-prayer/)
+[![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)](LivelyInfo.json)
+[![Last commit](https://img.shields.io/github/last-commit/i2pacg/bd-always-prayer?color=informational)](https://github.com/i2pacg/bd-always-prayer/commits/master)
 
-## Use With Lively Wallpaper
+A quiet Lively Wallpaper that rotates Arabic and English prayers over a calm animated dark gradient. Tunable from Lively's Customize panel; prayers can refresh live from a remote JSON endpoint.
 
-Two install paths. Pick based on whether you want the Lively **Customize** sliders.
+**Live preview:** <https://i2pacg.github.io/bd-always-prayer/>
 
-### Zip install (recommended - keeps the Customize panel)
+![Preview](assets/preview/preview.jpg)
 
-1. Download the zip: <https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip>
-2. Drag the downloaded zip into the Lively Wallpaper window.
-3. Select `bd-always-prayer` from the library.
-4. Right-click the wallpaper in Lively and choose **Customize** to edit settings (palette, motion, refresh interval, etc.).
+---
 
-Updates: re-download the zip and drag again when the wallpaper code changes. Prayer text updates live without re-installing (see Remote Prayer API below).
+## Install
 
-### URL install (auto-updating, no Customize panel)
+Two paths. Pick based on whether you want Lively's **Customize** sliders.
 
-Lively's **Add Wallpaper -> URL** field accepts a webpage as a wallpaper. Paste:
+### Zip install &nbsp;·&nbsp; recommended
 
-```text
-https://i2pacg.github.io/bd-always-prayer/
-```
+Keeps the full Customize panel (palette, motion, refresh interval, particles, etc.). Re-download when the wallpaper code changes; prayer text updates live without re-installing.
 
-The wallpaper code auto-updates on every page load - no re-install when the visuals change. Tradeoff: Lively does not read `LivelyProperties.json` from a URL wallpaper, so the Customize sliders are not available on this path. Defaults from `script.js` are used.
+1. Download &nbsp;→&nbsp; [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) &nbsp;<!-- zip-size --> 457 KB <!-- /zip-size -->
+2. Drag the zip into the Lively window.
+3. Select **bd-always-prayer** in the library.
+4. Right-click → **Customize** to tune settings.
 
-### Folder install (development)
+### URL install &nbsp;·&nbsp; auto-updating
 
-1. Open Lively Wallpaper.
-2. Add a new wallpaper from this project folder.
-3. Select `index.html` as the web wallpaper entry file if prompted.
-4. Lively reads `LivelyInfo.json` and `LivelyProperties.json` from the same folder.
+Wallpaper code auto-updates on every page load. No Customize panel — Lively does not read `LivelyProperties.json` from URL wallpapers, so the in-script defaults are used.
 
-No web server is required for normal Lively usage. The Python server mentioned later is only a local preview convenience for browsers.
+1. Open Lively → **Add Wallpaper** → URL field.
+2. Paste:
 
-## Quote Data
+   ```
+   https://i2pacg.github.io/bd-always-prayer/
+   ```
 
-Quotes are loaded from `quotes.json`. The file is required; the page intentionally does not include fallback quotes.
+---
 
-Each entry supports:
+## Configure
+
+The Lively Customize panel controls every visual and behavior knob below. Settings come from [`LivelyProperties.json`](LivelyProperties.json).
+
+| Group | Setting | What it changes |
+| --- | --- | --- |
+| Timing | Quote interval | Seconds each entry stays on screen. |
+| Text | Text scale | Overall quote size; still bounded by auto-fit. |
+| Text | Text opacity | Strength of the foreground text. |
+| Text | Show title/source | Shows or hides quote metadata. |
+| Data | Prayer source | Bundled `quotes.json` or a remote endpoint. |
+| Data | Remote endpoint URL | URL of the remote prayers JSON. |
+| Data | Remote refresh minutes | Auto-reload interval. `0` disables. |
+| Background | Motion intensity | Speed of the gradient drift. |
+| Background | Palette intensity | Strength of the muted color spectrum. |
+| Background | Palette mode | Calm Spectrum · Graphite · Deep Teal · Cool Violet · Smoky Emerald. |
+| Background | Background brightness | Dim or lift the backdrop while keeping text readable. |
+| Background | Particle density | How many quiet light particles are shown. |
+| Background | Particle glow | How softly particles illuminate the background. |
+| Motion | Enable animation | Master on/off for text and background motion. |
+
+---
+
+## Prayer data
+
+### Local file
+
+Prayers ship in [`quotes.json`](quotes.json). The file is required; there is no silent fallback. Each entry:
 
 ```json
 {
-  "text": "Required quote text.",
-  "lines": ["Optional", "author-controlled", "visual lines"],
-  "title": "Optional title.",
-  "source": "Optional source or quoted-from text.",
-  "lang": "Optional language hint, such as ar or en.",
-  "dir": "Optional text direction, such as rtl or ltr."
+  "text": "Required when no lines.",
+  "lines": ["Optional", "author-controlled", "exact line breaks"],
+  "title": "Optional",
+  "source": "Optional",
+  "lang": "ar | en | ...",
+  "dir": "rtl | ltr"
 }
 ```
 
-Use `lines` when a prayer, verse, or quote needs specific line endings. The renderer treats those line breaks as intentional and fits the text to the screen instead of letting the browser choose the line breaks. Use `text` for simpler entries where automatic wrapping is acceptable.
+Use `lines` when a verse needs specific line breaks. Use `text` for simpler entries that may wrap automatically. Arabic entries render with Scheherazade New; everything else uses Montserrat.
 
-Arabic entries render with Scheherazade New, a traditional Naskh-style Arabic font with strong shaping and diacritic support. English and Latin-script entries render with Montserrat.
+### Remote endpoint
 
-## Remote Prayer API
+Switch **Prayer source** to *Remote endpoint* in Customize. Default URL:
 
-Lively Customize can switch the data source from local `quotes.json` to a remote endpoint. The default endpoint field is:
-
-```text
+```
 https://prayer.ibrahimomer.net/quotes.json
 ```
 
-The endpoint can return either the raw array used by `quotes.json` or this wrapped shape:
+Endpoint returns either a raw array or a wrapped object:
 
 ```json
 {
   "version": 1,
   "updatedAt": "2026-05-20T00:00:00Z",
   "prayers": [
-    {
-      "lines": ["Required prayer line", "Another exact line"],
-      "title": "Optional title",
-      "source": "Optional source",
-      "lang": "ar",
-      "dir": "rtl"
-    }
+    { "lines": ["..."], "title": "...", "lang": "ar", "dir": "rtl" }
   ]
 }
 ```
 
-If the remote endpoint fails, the wallpaper shows a clear error state. There is no silent fallback to local quotes.
+If the endpoint fails the wallpaper shows a clear error — no silent local fallback.
 
-The endpoint must send `Access-Control-Allow-Origin: *` (and ideally `Cache-Control: no-cache`) so the Lively wallpaper, which loads from `file://`, can fetch it. A ready-to-use `server/.htaccess` is included in this repo - drop it next to `quotes.json` on the host serving the endpoint.
+**CORS requirement.** Because the wallpaper loads from `file://` (zip install) or from `i2pacg.github.io` (URL install), the endpoint must send `Access-Control-Allow-Origin: *`. A ready-to-use [`server/.htaccess`](server/.htaccess) is included — drop it next to `quotes.json` on the host serving the endpoint.
 
-## Local Preview
+---
 
-This is only for browser testing while developing. It is not needed by Lively.
+## Develop
 
-Run a small local server from this folder:
+```powershell
+# Validate, build the zip, probe the remote endpoint, stamp the README size.
+npm run ship
+
+# Same, but skip the network probe (offline dev).
+npm run ship:offline
+
+# Just rebuild the zip without the full pipeline.
+npm run package
+
+# Just validate JSON + script.js syntax.
+npm run validate
+```
+
+`npm run ship` is the only command you need before pushing. It:
+
+1. Validates JSON files and `script.js`.
+2. Checks every asset referenced from `index.html` and `styles.css` exists on disk.
+3. Probes the remote endpoint (HTTP 200, CORS header, valid JSON shape).
+4. Builds `dist/bd-always-prayer-lively.zip`.
+5. Stamps the current zip size into this README.
+
+It exits non-zero on any failure, so you don't push broken state. Step 5 may modify this README - stage the change if so.
+
+### Local browser preview
+
+Optional; not needed by Lively.
 
 ```powershell
 python -m http.server 4173
 ```
 
-Then open `http://localhost:4173`.
+Open <http://localhost:4173>.
 
-## Lively Settings
+### Project layout
 
-The wallpaper includes `LivelyProperties.json`, so these are editable from Lively's **Customize** panel.
-
-| Setting | What it changes |
-| --- | --- |
-| Quote interval | Seconds each entry stays on screen. |
-| Text scale | Overall quote size, still constrained by automatic fitting. |
-| Text opacity | Strength of the foreground text. |
-| Show title/source | Toggles optional quote metadata. |
-| Prayer source | Uses bundled `quotes.json` or a remote endpoint. |
-| Remote endpoint URL | URL for the remote prayers JSON endpoint. |
-| Remote refresh minutes | Reloads the remote endpoint periodically. Use `0` to disable. |
-| Motion intensity | Speed of the background gradient drift. |
-| Palette intensity | Strength of the muted color spectrum. |
-| Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |
-| Background brightness | Dims or lifts the background while keeping the quote readable. |
-| Particle density | Controls how many quiet light particles are shown. |
-| Particle glow | Controls how softly particles illuminate the background. |
-| Enable animation | Turns text and background motion on or off. |
-
-## Update Workflow
-
-Use this whenever you change the quote library, styling, Lively settings, or local fonts.
-
-1. Edit the source files:
-
-   - Quotes and line endings: `quotes.json`
-   - Lively Customize controls: `LivelyProperties.json`
-   - Lively metadata: `LivelyInfo.json`
-   - Visual style: `styles.css`
-   - Runtime behavior: `script.js`
-
-2. Rebuild the import zip:
-
-```powershell
-npm run release
 ```
-
-This validates the JSON, checks `script.js`, confirms required files exist, and writes:
-
-```text
-dist/bd-always-prayer-lively.zip
-```
-
-3. Test by dragging the rebuilt zip into Lively Wallpaper.
-
-4. Commit and push:
-
-```powershell
-git status --short
-git add .
-git commit -m "Describe the wallpaper update"
-git push
+index.html               Entry point. Lively loads this.
+styles.css               Visual style.
+script.js                Quote rotation, fitting, Lively property listener.
+particles.js             Background particle field.
+quotes.json              Bundled prayers (also served via Pages).
+LivelyInfo.json          Lively metadata.
+LivelyProperties.json    Customize panel definition.
+assets/fonts/            Self-hosted Scheherazade New and Montserrat.
+assets/preview/          Thumbnail + preview image for Lively library.
+server/.htaccess         CORS + no-cache config for the remote endpoint host.
+scripts/                 ship.ps1 and package-lively.ps1.
+dist/                    Built zip lives here.
 ```
