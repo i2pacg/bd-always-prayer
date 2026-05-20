@@ -15,6 +15,7 @@ $RequiredFiles = @(
     "index.html",
     "styles.css",
     "script.js",
+    "particles.js",
     "quotes.json",
     "README.md",
     "assets\fonts\montserrat-latin-400.woff2",

@@ -109,6 +109,15 @@ body.palette-emerald {
     linear-gradient(145deg, #010203 0%, #07090b 42%, #020306 100%);
 }
 
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 body.palette-graphite .wallpaper {
   background:
     radial-gradient(circle at 20% 20%, rgba(126, 134, 137, calc(0.18 * var(--palette-intensity))), transparent 32%),

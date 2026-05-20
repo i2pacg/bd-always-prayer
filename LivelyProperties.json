@@ -71,6 +71,24 @@
     "help": "Lower values keep the wallpaper darker.",
     "value": 28
   },
+  "particleDensity": {
+    "max": 100,
+    "min": 0,
+    "step": 1,
+    "text": "Particle density",
+    "type": "slider",
+    "help": "Controls the number of quiet light particles in the background.",
+    "value": 58
+  },
+  "particleGlow": {
+    "max": 100,
+    "min": 0,
+    "step": 1,
+    "text": "Particle glow",
+    "type": "slider",
+    "help": "Controls how softly the particles illuminate the background.",
+    "value": 62
+  },
   "paletteMode": {
     "type": "dropdown",
     "value": 0,

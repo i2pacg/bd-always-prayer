@@ -67,6 +67,8 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Palette intensity | Strength of the muted color spectrum. |
 | Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |
 | Background brightness | Dims or lifts the background while keeping the quote readable. |
+| Particle density | Controls how many quiet light particles are shown. |
+| Particle glow | Controls how softly particles illuminate the background. |
 | Enable animation | Turns text and background motion on or off. |
 
 ## Update Workflow

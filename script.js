@@ -18,6 +18,8 @@ const state = {
     paletteIntensity: 0.85,
     paletteMode: 0,
     backgroundBrightness: 28,
+    particleDensity: 58,
+    particleGlow: 62,
     textOpacity: 0.94,
     showMetadata: true,
     enableAnimation: true
@@ -135,6 +137,17 @@ function applySettings() {
   document.body.classList.toggle("background-paused", state.settings.backgroundMotion <= 0.01);
   document.body.classList.remove(...paletteClasses);
   document.body.classList.add(paletteClasses[state.settings.paletteMode] || paletteClasses[0]);
+
+  if (window.bdParticles) {
+    window.bdParticles.set({
+      enabled: state.settings.enableAnimation,
+      density: state.settings.particleDensity,
+      glow: state.settings.particleGlow,
+      motion: state.settings.backgroundMotion,
+      paletteMode: state.settings.paletteMode,
+      brightness: state.settings.backgroundBrightness
+    });
+  }
 
   if (state.isReady) {
     refreshActiveLibrary();
@@ -299,6 +312,12 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
       break;
     case "backgroundBrightness":
       state.settings.backgroundBrightness = Math.min(70, Math.max(5, toNumber(value, 28)));
+      break;
+    case "particleDensity":
+      state.settings.particleDensity = Math.min(100, Math.max(0, toNumber(value, 58)));
+      break;
+    case "particleGlow":
+      state.settings.particleGlow = Math.min(100, Math.max(0, toNumber(value, 62)));
       break;
     case "textOpacity":
       state.settings.textOpacity = Math.min(1, Math.max(0.45, toNumber(value, 94) / 100));
