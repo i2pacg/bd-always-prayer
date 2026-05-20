@@ -1,0 +1,359 @@
+@font-face {
+  font-family: "Cairo Local";
+  src: url("assets/fonts/cairo-arabic-400.woff2") format("woff2"),
+    url("assets/fonts/cairo-latin-400.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Cairo Local";
+  src: url("assets/fonts/cairo-arabic-500.woff2") format("woff2"),
+    url("assets/fonts/cairo-latin-500.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Cairo Local";
+  src: url("assets/fonts/cairo-arabic-600.woff2") format("woff2"),
+    url("assets/fonts/cairo-latin-600.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "Montserrat Local";
+  src: url("assets/fonts/montserrat-latin-400.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Montserrat Local";
+  src: url("assets/fonts/montserrat-latin-500.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "Montserrat Local";
+  src: url("assets/fonts/montserrat-latin-600.woff2") format("woff2");
+  font-display: swap;
+  font-style: normal;
+  font-weight: 600;
+}
+
+:root {
+  --motion-scale: 1;
+  --palette-intensity: 1;
+  --text-opacity: 0.94;
+  --text-scale: 1;
+  --ambient-alpha: 0.6;
+  --quote-font-size: 42px;
+  --meta-display: block;
+  --quote-duration: 900ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #050607;
+}
+
+body {
+  color: rgba(250, 250, 247, var(--text-opacity));
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+}
+
+.wallpaper {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  padding: clamp(30px, 7vw, 108px);
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(68, 110, 128, calc(0.26 * var(--palette-intensity))), transparent 34%),
+    radial-gradient(circle at 84% 24%, rgba(82, 72, 124, calc(0.22 * var(--palette-intensity))), transparent 31%),
+    radial-gradient(circle at 50% 86%, rgba(86, 108, 92, calc(0.2 * var(--palette-intensity))), transparent 36%),
+    linear-gradient(145deg, #040506 0%, #111315 42%, #080a0e 100%);
+}
+
+.wallpaper::before,
+.wallpaper::after {
+  position: absolute;
+  inset: -35%;
+  z-index: -4;
+  content: "";
+  transform-origin: center;
+  will-change: transform, filter, opacity;
+}
+
+.wallpaper::before {
+  background:
+    conic-gradient(
+      from 40deg at 50% 50%,
+      rgba(48, 60, 68, 0.3),
+      rgba(30, 78, 86, 0.34),
+      rgba(58, 54, 98, 0.3),
+      rgba(78, 88, 72, 0.26),
+      rgba(108, 92, 78, 0.18),
+      rgba(48, 60, 68, 0.3)
+    );
+  filter: blur(74px) saturate(calc(0.8 + (var(--palette-intensity) * 0.55)));
+  opacity: calc(0.58 * var(--palette-intensity));
+  animation: spectrumDrift calc(34s / var(--motion-scale)) ease-in-out infinite alternate;
+}
+
+.wallpaper::after {
+  background:
+    radial-gradient(circle at 62% 42%, rgba(232, 236, 225, 0.1), transparent 24%),
+    radial-gradient(circle at 28% 70%, rgba(64, 104, 116, 0.22), transparent 27%),
+    radial-gradient(circle at 74% 78%, rgba(104, 88, 122, 0.16), transparent 30%);
+  filter: blur(46px);
+  opacity: calc(0.55 * var(--palette-intensity));
+  animation: slowBreathe calc(22s / var(--motion-scale)) ease-in-out infinite alternate;
+}
+
+.ambient {
+  position: absolute;
+  z-index: -3;
+  width: 62vmax;
+  height: 62vmax;
+  border-radius: 999px;
+  filter: blur(62px);
+  opacity: var(--ambient-alpha);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.ambient-one {
+  top: -26vmax;
+  left: -16vmax;
+  background: radial-gradient(circle, rgba(39, 89, 96, 0.22), transparent 62%);
+  animation: ambientOne calc(28s / var(--motion-scale)) ease-in-out infinite alternate;
+}
+
+.ambient-two {
+  right: -22vmax;
+  bottom: -25vmax;
+  background: radial-gradient(circle, rgba(84, 74, 112, 0.2), transparent 64%);
+  animation: ambientTwo calc(32s / var(--motion-scale)) ease-in-out infinite alternate;
+}
+
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.12;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(circle at center, black, transparent 76%);
+}
+
+.quote-stage,
+.error-state {
+  width: min(1120px, 100%);
+  max-height: min(74vh, 760px);
+  text-align: center;
+}
+
+.quote-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2.8vh, 28px);
+  transition:
+    opacity var(--quote-duration) ease,
+    transform var(--quote-duration) ease,
+    filter var(--quote-duration) ease;
+}
+
+.quote-stage.is-entering {
+  opacity: 0;
+  transform: translateY(14px);
+  filter: blur(10px);
+}
+
+.quote-stage.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+.quote-stage.is-leaving {
+  opacity: 0;
+  transform: translateY(-10px);
+  filter: blur(8px);
+}
+
+.quote-text,
+.quote-meta,
+.error-title,
+.error-message {
+  margin: 0;
+}
+
+.quote-text {
+  max-width: 100%;
+  max-height: 100%;
+  color: rgba(251, 251, 248, var(--text-opacity));
+  font-size: var(--quote-font-size);
+  font-weight: 500;
+  line-height: var(--quote-line-height, 1.55);
+  text-wrap: balance;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  text-shadow: 0 18px 64px rgba(0, 0, 0, 0.36);
+}
+
+.quote-stage[data-script="arabic"] .quote-text {
+  font-family: "Cairo Local", "Tahoma", sans-serif;
+  font-weight: 500;
+  line-height: var(--quote-line-height, 1.85);
+}
+
+.quote-stage[data-script="latin"] .quote-text {
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+  font-weight: 500;
+  line-height: var(--quote-line-height, 1.56);
+}
+
+.quote-meta {
+  display: var(--meta-display);
+  max-width: min(760px, 100%);
+  color: rgba(236, 236, 228, calc(var(--text-opacity) * 0.64));
+  font-size: clamp(12px, 1.5vw, 16px);
+  font-weight: 500;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.quote-stage[data-script="arabic"] .quote-meta {
+  font-family: "Cairo Local", "Tahoma", sans-serif;
+}
+
+.quote-stage[data-script="latin"] .quote-meta {
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.error-state {
+  display: grid;
+  gap: 12px;
+  color: rgba(251, 251, 248, 0.88);
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+}
+
+.error-state[hidden] {
+  display: none;
+}
+
+.error-title {
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 600;
+}
+
+.error-message {
+  color: rgba(236, 236, 228, 0.62);
+  font-size: clamp(13px, 1.5vw, 16px);
+  line-height: 1.6;
+}
+
+@keyframes spectrumDrift {
+  0% {
+    transform: translate3d(-3%, -2%, 0) rotate(0deg) scale(1);
+  }
+
+  45% {
+    transform: translate3d(3%, -1%, 0) rotate(45deg) scale(1.05);
+  }
+
+  100% {
+    transform: translate3d(2%, 4%, 0) rotate(92deg) scale(1.1);
+  }
+}
+
+@keyframes slowBreathe {
+  from {
+    transform: translate3d(-2%, 1%, 0) scale(0.96);
+  }
+
+  to {
+    transform: translate3d(2%, -2%, 0) scale(1.07);
+  }
+}
+
+@keyframes ambientOne {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(13vw, 10vh, 0) scale(1.12);
+  }
+}
+
+@keyframes ambientTwo {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+
+  to {
+    transform: translate3d(-10vw, -8vh, 0) scale(0.94);
+  }
+}
+
+@media (max-width: 720px) {
+  .wallpaper {
+    padding: clamp(24px, 9vw, 56px);
+  }
+
+  .quote-stage,
+  .error-state {
+    max-height: 78vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallpaper::before,
+  .wallpaper::after,
+  .ambient {
+    animation: none;
+  }
+
+  .quote-stage {
+    transition-duration: 1ms;
+  }
+}
+
+body.motion-disabled .wallpaper::before,
+body.motion-disabled .wallpaper::after,
+body.motion-disabled .ambient {
+  animation: none;
+}
+
+body.motion-disabled .quote-stage {
+  transition-duration: 1ms;
+}
