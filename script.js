@@ -586,8 +586,15 @@ function focusEditableControl(control, shouldSelect = false) {
   }
 
   state.activeEditorControl = control;
+  control.focus({ preventScroll: true });
+  if (shouldSelect && (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) {
+    control.select();
+  }
+
   window.requestAnimationFrame(() => {
-    control.focus({ preventScroll: true });
+    if (document.activeElement !== control) {
+      control.focus({ preventScroll: true });
+    }
 
     if (shouldSelect && (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) {
       control.select();
@@ -1005,7 +1012,7 @@ function openLibraryPanel() {
   document.body.classList.add("library-open");
   renderLibraryList();
   renderLibraryPreview();
-  window.requestAnimationFrame(() => focusPrimaryEditorField());
+  focusPrimaryEditorField();
 }
 
 function closeLibraryPanel() {
