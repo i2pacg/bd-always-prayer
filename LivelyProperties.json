@@ -40,6 +40,32 @@
     "help": "Shows the optional title and source from quotes.json.",
     "value": true
   },
+  "sourceLabel": {
+    "type": "label",
+    "value": "Data Source"
+  },
+  "dataSource": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Prayer source",
+    "help": "Choose bundled quotes.json or a remote prayers endpoint.",
+    "items": [
+      "Local quotes.json",
+      "Remote endpoint"
+    ]
+  },
+  "remoteEndpoint": {
+    "text": "Remote endpoint URL",
+    "type": "textbox",
+    "help": "Endpoint returning either an array of prayers or {\"prayers\": [...]}.",
+    "value": "https://prayer.ibrahimomer.net/prayers.json"
+  },
+  "fallbackToLocal": {
+    "text": "Fallback to local quotes",
+    "type": "checkbox",
+    "help": "If the remote endpoint fails, use bundled quotes.json instead of showing an error.",
+    "value": false
+  },
   "backgroundLabel": {
     "type": "label",
     "value": "Background"

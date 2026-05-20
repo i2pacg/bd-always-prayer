@@ -41,6 +41,34 @@ Use `lines` when a prayer, verse, or quote needs specific line endings. The rend
 
 Arabic entries render with Scheherazade New, a traditional Naskh-style Arabic font with strong shaping and diacritic support. English and Latin-script entries render with Montserrat.
 
+## Remote Prayer API
+
+Lively Customize can switch the data source from local `quotes.json` to a remote endpoint. The default endpoint field is:
+
+```text
+https://prayer.ibrahimomer.net/prayers.json
+```
+
+The endpoint can return either the raw array used by `quotes.json` or this wrapped shape:
+
+```json
+{
+  "version": 1,
+  "updatedAt": "2026-05-20T00:00:00Z",
+  "prayers": [
+    {
+      "lines": ["Required prayer line", "Another exact line"],
+      "title": "Optional title",
+      "source": "Optional source",
+      "lang": "ar",
+      "dir": "rtl"
+    }
+  ]
+}
+```
+
+If `Fallback to local quotes` is disabled and the remote endpoint fails, the wallpaper shows a clear error state.
+
 ## Local Preview
 
 This is only for browser testing while developing. It is not needed by Lively.
@@ -63,6 +91,9 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Text scale | Overall quote size, still constrained by automatic fitting. |
 | Text opacity | Strength of the foreground text. |
 | Show title/source | Toggles optional quote metadata. |
+| Prayer source | Uses bundled `quotes.json` or a remote endpoint. |
+| Remote endpoint URL | URL for the remote prayers JSON endpoint. |
+| Fallback to local quotes | Uses bundled quotes if the remote endpoint fails. |
 | Motion intensity | Speed of the background gradient drift. |
 | Palette intensity | Strength of the muted color spectrum. |
 | Palette mode | Chooses between calm spectrum, graphite, teal, violet, and emerald. |

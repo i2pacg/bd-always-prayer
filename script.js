@@ -22,6 +22,9 @@ const state = {
     particleGlow: 62,
     textOpacity: 0.94,
     showMetadata: true,
+    dataSource: 0,
+    remoteEndpoint: "https://prayer.ibrahimomer.net/prayers.json",
+    fallbackToLocal: false,
     enableAnimation: true
   },
   activeQuotes: []
@@ -61,18 +64,51 @@ function normalizeQuote(entry, index) {
   };
 }
 
-async function loadQuotes() {
-  const response = await fetch("quotes.json", { cache: "no-store" });
+async function fetchJson(url) {
+  const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(`quotes.json returned ${response.status}.`);
+    throw new Error(`${url} returned ${response.status}.`);
   }
 
-  const data = await response.json();
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("quotes.json must contain at least one quote.");
+  return response.json();
+}
+
+function normalizeQuotePayload(data, sourceName) {
+  const entries = Array.isArray(data) ? data : data && Array.isArray(data.prayers) ? data.prayers : [];
+  if (entries.length === 0) {
+    throw new Error(`${sourceName} must contain at least one prayer.`);
   }
 
-  return data.map(normalizeQuote);
+  return entries.map(normalizeQuote);
+}
+
+async function loadLocalQuotes() {
+  return normalizeQuotePayload(await fetchJson("quotes.json"), "quotes.json");
+}
+
+async function loadRemoteQuotes() {
+  const endpoint = state.settings.remoteEndpoint.trim();
+  if (!endpoint) {
+    throw new Error("Remote endpoint URL is empty.");
+  }
+
+  return normalizeQuotePayload(await fetchJson(endpoint), endpoint);
+}
+
+async function loadQuotes() {
+  if (state.settings.dataSource !== 1) {
+    return loadLocalQuotes();
+  }
+
+  try {
+    return await loadRemoteQuotes();
+  } catch (error) {
+    if (state.settings.fallbackToLocal) {
+      return loadLocalQuotes();
+    }
+
+    throw error;
+  }
 }
 
 function getActiveQuotes() {
@@ -101,6 +137,16 @@ function showError(error) {
   quoteStage.hidden = true;
   errorState.hidden = false;
   errorMessage.textContent = error instanceof Error ? error.message : String(error);
+}
+
+function showQuotes() {
+  state.isReady = true;
+  errorState.hidden = true;
+  quoteStage.hidden = false;
+  state.activeQuotes = getActiveQuotes();
+  state.index = Math.min(state.index, state.activeQuotes.length - 1);
+  renderQuote(state.index, false);
+  restartTimer();
 }
 
 function clearTimer() {
@@ -268,16 +314,22 @@ async function start() {
   try {
     applySettings();
     state.quotes = await loadQuotes();
-    state.activeQuotes = getActiveQuotes();
-    state.isReady = true;
-    errorState.hidden = true;
-    quoteStage.hidden = false;
-    renderQuote(0, false);
-    restartTimer();
+    showQuotes();
     window.addEventListener("resize", handleResize);
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(fitQuote);
     }
+  } catch (error) {
+    showError(error);
+  }
+}
+
+async function reloadQuotes() {
+  try {
+    clearTimer();
+    state.quotes = await loadQuotes();
+    state.index = 0;
+    showQuotes();
   } catch (error) {
     showError(error);
   }
@@ -327,6 +379,24 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
       break;
     case "showMetadata":
       state.settings.showMetadata = toBoolean(value);
+      break;
+    case "dataSource":
+      state.settings.dataSource = Math.round(toNumber(value, 0));
+      reloadQuotes();
+      return;
+    case "remoteEndpoint":
+      state.settings.remoteEndpoint = typeof value === "string" ? value.trim() : String(value || "").trim();
+      if (state.settings.dataSource === 1) {
+        reloadQuotes();
+        return;
+      }
+      break;
+    case "fallbackToLocal":
+      state.settings.fallbackToLocal = toBoolean(value);
+      if (state.settings.dataSource === 1) {
+        reloadQuotes();
+        return;
+      }
       break;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);
