@@ -46,7 +46,7 @@ Arabic entries render with Scheherazade New, a traditional Naskh-style Arabic fo
 Lively Customize can switch the data source from local `quotes.json` to a remote endpoint. The default endpoint field is:
 
 ```text
-https://prayer.ibrahimomer.net/prayers.json
+https://prayer.ibrahimomer.net/quotes.json
 ```
 
 The endpoint can return either the raw array used by `quotes.json` or this wrapped shape:
@@ -93,6 +93,7 @@ The wallpaper includes `LivelyProperties.json`, so these are editable from Livel
 | Show title/source | Toggles optional quote metadata. |
 | Prayer source | Uses bundled `quotes.json` or a remote endpoint. |
 | Remote endpoint URL | URL for the remote prayers JSON endpoint. |
+| Remote refresh minutes | Reloads the remote endpoint periodically. Use `0` to disable. |
 | Fallback to local quotes | Uses bundled quotes if the remote endpoint fails. |
 | Motion intensity | Speed of the background gradient drift. |
 | Palette intensity | Strength of the muted color spectrum. |

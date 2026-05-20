@@ -58,7 +58,16 @@
     "text": "Remote endpoint URL",
     "type": "textbox",
     "help": "Endpoint returning either an array of prayers or {\"prayers\": [...]}.",
-    "value": "https://prayer.ibrahimomer.net/prayers.json"
+    "value": "https://prayer.ibrahimomer.net/quotes.json"
+  },
+  "remoteRefreshMinutes": {
+    "max": 120,
+    "min": 0,
+    "step": 1,
+    "text": "Remote refresh minutes",
+    "type": "slider",
+    "help": "How often to reload the remote endpoint. Use 0 to disable automatic refresh.",
+    "value": 15
   },
   "fallbackToLocal": {
     "text": "Fallback to local quotes",

@@ -23,10 +23,12 @@ const state = {
     textOpacity: 0.94,
     showMetadata: true,
     dataSource: 0,
-    remoteEndpoint: "https://prayer.ibrahimomer.net/prayers.json",
+    remoteEndpoint: "https://prayer.ibrahimomer.net/quotes.json",
+    remoteRefreshMinutes: 15,
     fallbackToLocal: false,
     enableAnimation: true
   },
+  refreshTimer: null,
   activeQuotes: []
 };
 
@@ -134,6 +136,7 @@ function refreshActiveLibrary() {
 function showError(error) {
   state.isReady = false;
   clearTimer();
+  clearRefreshTimer();
   quoteStage.hidden = true;
   errorState.hidden = false;
   errorMessage.textContent = error instanceof Error ? error.message : String(error);
@@ -147,6 +150,7 @@ function showQuotes() {
   state.index = Math.min(state.index, state.activeQuotes.length - 1);
   renderQuote(state.index, false);
   restartTimer();
+  restartRefreshTimer();
 }
 
 function clearTimer() {
@@ -154,6 +158,22 @@ function clearTimer() {
     window.clearInterval(state.timer);
     state.timer = null;
   }
+}
+
+function clearRefreshTimer() {
+  if (state.refreshTimer) {
+    window.clearInterval(state.refreshTimer);
+    state.refreshTimer = null;
+  }
+}
+
+function restartRefreshTimer() {
+  clearRefreshTimer();
+  if (state.settings.dataSource !== 1 || state.settings.remoteRefreshMinutes <= 0) {
+    return;
+  }
+
+  state.refreshTimer = window.setInterval(reloadQuotes, state.settings.remoteRefreshMinutes * 60 * 1000);
 }
 
 function getMetaText(quote) {
@@ -390,6 +410,10 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
         reloadQuotes();
         return;
       }
+      break;
+    case "remoteRefreshMinutes":
+      state.settings.remoteRefreshMinutes = Math.max(0, toNumber(value, 15));
+      restartRefreshTimer();
       break;
     case "fallbackToLocal":
       state.settings.fallbackToLocal = toBoolean(value);
