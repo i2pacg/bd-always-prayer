@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [string]$Version,
+    [string]$NotesFile,
     [switch]$SkipShip,
     [switch]$Draft,
     [switch]$Prerelease
@@ -59,6 +60,16 @@ try {
         throw "Missing release asset: dist\bd-always-prayer-lively.zip"
     }
 
+    $ResolvedNotesFile = if ($NotesFile) {
+        if ([System.IO.Path]::IsPathRooted($NotesFile)) { $NotesFile } else { Join-Path $Root $NotesFile }
+    } else {
+        Join-Path $Root "release-notes\$Version.md"
+    }
+
+    if (-not (Test-Path -LiteralPath $ResolvedNotesFile -PathType Leaf)) {
+        throw "Missing release notes: $ResolvedNotesFile. Create release-notes\$Version.md or pass -NotesFile."
+    }
+
     $dirty = Run-Git @("status", "--porcelain")
     if ($dirty) {
         throw "Working tree has uncommitted changes after the build. Commit and push them, then rerun this release command."
@@ -98,7 +109,8 @@ try {
         "dist/bd-always-prayer-lively.zip",
         "--title",
         "bd-always-prayer $Version",
-        "--generate-notes"
+        "--notes-file",
+        $ResolvedNotesFile
     )
 
     if ($Draft) {

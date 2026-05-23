@@ -238,6 +238,7 @@ npm run package
 npm run validate
 
 # Create a versioned GitHub Release after committing and pushing.
+# Requires release-notes/v1.2.3.md unless -NotesFile is passed.
 npm run release:github -- -Version v1.2.3
 ```
 
@@ -277,6 +278,8 @@ npm run release:github -- -Version v1.2.3
 The release helper runs the ship pipeline, checks that the working tree is clean, verifies the current branch is pushed, creates an annotated tag, pushes it, and uploads `dist/bd-always-prayer-lively.zip` to the GitHub Release. Add `-Draft` or `-Prerelease` when needed. Use `-SkipShip` only after a successful `npm run ship` on the same commit.
 
 Release assets are the user-facing downloads. The built zip in `dist/` is kept in the repository so the release helper and GitHub Pages can serve the same packaged file.
+
+Release notes are written manually in `release-notes/vX.Y.Z.md`, so the GitHub release page shows a friendly changelog instead of only a compare link.
 
 ---
 
