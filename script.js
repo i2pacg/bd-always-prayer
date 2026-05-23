@@ -206,7 +206,7 @@ function persistSourceSettings() {
 function renderSourceControls() {
   const isRemote = state.settings.dataSource === 1;
 
-  librarySourceSummary.textContent = isRemote ? "Remote + local" : "Local library";
+  librarySourceSummary.textContent = isRemote ? "Remote endpoint, then local library" : "Local library only";
   librarySourceLocal.classList.toggle("is-active", !isRemote);
   librarySourceLocal.setAttribute("aria-pressed", String(!isRemote));
   librarySourceRemote.classList.toggle("is-active", isRemote);

@@ -556,46 +556,49 @@ body.library-open .library-toggle {
 
 .library-source {
   display: grid;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid rgba(246, 246, 238, 0.08);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.025);
+  gap: 8px;
+  padding: 0 0 2px;
 }
 
-.library-source-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
+.library-source-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
 }
 
-.library-source-heading span {
+.library-source-label {
   color: rgba(236, 236, 228, 0.58);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
 }
 
-.library-source-heading strong {
-  color: rgba(248, 248, 241, 0.88);
-  font-size: 12px;
-  font-weight: 600;
+.library-source-summary {
+  margin: 0;
+  color: rgba(236, 236, 228, 0.48);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .library-source-toggle {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 3px;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid rgba(246, 246, 238, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .library-source-toggle button {
-  min-height: 34px;
-  padding: 0 10px;
-  border: 1px solid rgba(246, 246, 238, 0.11);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(248, 248, 241, 0.72);
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(248, 248, 241, 0.62);
   cursor: pointer;
   font-family: "Montserrat Local", "Segoe UI", sans-serif;
   font-size: 12px;
@@ -605,8 +608,7 @@ body.library-open .library-toggle {
 .library-source-toggle button:hover,
 .library-source-toggle button:focus-visible,
 .library-source-toggle button.is-active {
-  border-color: rgba(177, 211, 204, 0.32);
-  background: rgba(90, 124, 118, 0.15);
+  background: rgba(177, 211, 204, 0.12);
   color: rgba(248, 248, 241, 0.95);
 }
 
@@ -729,7 +731,7 @@ body.library-open .library-toggle {
 .library-endpoint-import,
 .library-remote-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 76px;
+  grid-template-columns: minmax(0, 1fr) 84px;
   gap: 8px;
 }
 
@@ -1082,6 +1084,18 @@ body.library-open .library-toggle {
 
   .library-preview-text {
     font-size: 19px;
+  }
+}
+
+@media (max-width: 430px) {
+  .library-source-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  .library-endpoint-import,
+  .library-remote-form {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -49,16 +49,16 @@
           <div class="library-body">
             <aside class="library-list-pane" aria-label="Local prayer library">
               <section class="library-source" aria-label="Prayer source">
-                <div class="library-source-heading">
-                  <span>Prayer source</span>
-                  <strong id="librarySourceSummary">Local library</strong>
+                <div class="library-source-row">
+                  <span class="library-source-label">Source</span>
+                  <div class="library-source-toggle" role="group" aria-label="Prayer source">
+                    <button id="librarySourceLocal" type="button">Local</button>
+                    <button id="librarySourceRemote" type="button">Remote</button>
+                  </div>
                 </div>
-                <div class="library-source-toggle" role="group" aria-label="Prayer source">
-                  <button id="librarySourceLocal" type="button">Local</button>
-                  <button id="librarySourceRemote" type="button">Remote + local</button>
-                </div>
+                <p class="library-source-summary" id="librarySourceSummary">Local library only</p>
                 <form class="library-remote-form" id="libraryRemoteForm" hidden>
-                  <input id="libraryRemoteEndpoint" type="url" autocomplete="off" placeholder="https://...">
+                  <input id="libraryRemoteEndpoint" type="url" autocomplete="off" placeholder="Remote JSON endpoint">
                   <button class="library-tool-button library-refresh-button" id="libraryRemoteRefresh" type="submit" aria-label="Refresh remote source" data-tooltip="Refresh active remote source">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M21 12a9 9 0 0 1-15.3 6.4"></path>
