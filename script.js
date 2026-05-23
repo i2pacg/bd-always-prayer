@@ -3,6 +3,9 @@ const quoteText = document.getElementById("quoteText");
 const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
+const previewToggle = document.getElementById("previewToggle");
+const previewPanel = document.getElementById("previewPanel");
+const previewClose = document.getElementById("previewClose");
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
 const librarySheet = document.getElementById("librarySheet");
@@ -1246,7 +1249,7 @@ function toBoolean(value) {
   return String(value).toLowerCase() === "true";
 }
 
-window.livelyPropertyListener = function livelyPropertyListener(name, value) {
+function applyControlSetting(name, value) {
   switch (name) {
     case "intervalSeconds":
       state.settings.intervalSeconds = Math.max(5, toNumber(value, 12));
@@ -1290,6 +1293,108 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
   }
 
   applySettings();
+  syncPreviewControls();
+}
+
+function isGithubPagesPreview() {
+  const params = new URLSearchParams(window.location.search);
+  return window.location.hostname === "i2pacg.github.io"
+    && window.location.pathname.toLowerCase().includes("/bd-always-prayer")
+    && (params.get("preview") === "1" || params.get("previewSettings") === "1");
+}
+
+function getPreviewSettingValue(name) {
+  switch (name) {
+    case "intervalSeconds":
+      return state.settings.intervalSeconds;
+    case "textScale":
+      return Math.round(state.settings.textScale * 100);
+    case "textOpacity":
+      return Math.round(state.settings.textOpacity * 100);
+    case "backgroundMotion":
+      return Math.round(state.settings.backgroundMotion * 100);
+    case "paletteIntensity":
+      return Math.round(state.settings.paletteIntensity * 100);
+    case "paletteMode":
+      return state.settings.paletteMode;
+    case "backgroundBrightness":
+      return state.settings.backgroundBrightness;
+    case "particleDensity":
+      return state.settings.particleDensity;
+    case "particleGlow":
+      return state.settings.particleGlow;
+    case "showMetadata":
+      return state.settings.showMetadata;
+    case "enableAnimation":
+      return state.settings.enableAnimation;
+    default:
+      return "";
+  }
+}
+
+function syncPreviewControls() {
+  if (!previewPanel || !previewToggle || previewToggle.hidden) {
+    return;
+  }
+
+  previewPanel.querySelectorAll("[data-preview-setting]").forEach((control) => {
+    const value = getPreviewSettingValue(control.dataset.previewSetting);
+    if (control.type === "checkbox") {
+      control.checked = Boolean(value);
+    } else {
+      control.value = String(value);
+    }
+  });
+}
+
+function initPreviewControls() {
+  if (!previewToggle || !previewPanel || !previewClose || !isGithubPagesPreview()) {
+    return;
+  }
+
+  previewToggle.hidden = false;
+  previewToggle.addEventListener("click", () => {
+    previewPanel.hidden = !previewPanel.hidden;
+    document.body.classList.toggle("preview-open", !previewPanel.hidden);
+    syncPreviewControls();
+  });
+  previewClose.addEventListener("click", () => {
+    previewPanel.hidden = true;
+    document.body.classList.remove("preview-open");
+    previewToggle.focus({ preventScroll: true });
+  });
+  previewPanel.addEventListener("input", (event) => {
+    const control = event.target;
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement) || !control.dataset.previewSetting) {
+      return;
+    }
+    if (control.type !== "range") {
+      return;
+    }
+
+    applyControlSetting(control.dataset.previewSetting, control.value);
+  });
+  previewPanel.addEventListener("change", (event) => {
+    const control = event.target;
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement) || !control.dataset.previewSetting) {
+      return;
+    }
+
+    applyControlSetting(control.dataset.previewSetting, control.type === "checkbox" ? control.checked : control.value);
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !previewPanel.hidden) {
+      previewPanel.hidden = true;
+      document.body.classList.remove("preview-open");
+      previewToggle.focus({ preventScroll: true });
+    }
+  });
+  syncPreviewControls();
+}
+
+window.livelyPropertyListener = function livelyPropertyListener(name, value) {
+  applyControlSetting(name, value);
 };
 
+initPreviewControls();
 start();

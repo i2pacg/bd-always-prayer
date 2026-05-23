@@ -1,12 +1,12 @@
 # bd-always-prayer
 
-[![Live preview](https://img.shields.io/badge/preview-live-2ea44f?logo=github)](https://i2pacg.github.io/bd-always-prayer/)
+[![Live preview](https://img.shields.io/badge/preview-live-2ea44f?logo=github)](https://i2pacg.github.io/bd-always-prayer/?preview=1)
 [![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)](LivelyInfo.json)
 [![Last commit](https://img.shields.io/github/last-commit/i2pacg/bd-always-prayer?color=informational)](https://github.com/i2pacg/bd-always-prayer/commits/master)
 
 Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister/lively). It rotates Arabic and English prayers over a dark animated gradient with an adaptive particle field, exact line control, self-hosted fonts, optional remote data, and an in-wallpaper editor for the local prayer library.
 
-**Live preview:** <https://i2pacg.github.io/bd-always-prayer/>
+**Live preview:** <https://i2pacg.github.io/bd-always-prayer/?preview=1>
 
 ![Preview](assets/preview/preview.jpg)
 
@@ -18,7 +18,7 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 467.1 KB <!-- /zip-size -->
+1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 468.7 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
@@ -38,6 +38,8 @@ Use this when you want the wallpaper code to auto-update whenever the page reloa
    ```
 
 URL wallpapers do not load `LivelyProperties.json`, so Lively's Customize panel will not appear. The wallpaper uses its built-in defaults instead.
+
+The GitHub Pages live preview adds a small preview-only settings button when opened with `?preview=1`. That mirrors the visual Lively controls for browser testing only; the normal URL wallpaper above stays clean.
 
 ---
 
