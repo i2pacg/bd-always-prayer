@@ -21,6 +21,18 @@ function Run-Git {
     return $output
 }
 
+function Test-ReleaseExists {
+    param([string]$TagName)
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        & gh release view $TagName --json tagName *> $null
+        return $LASTEXITCODE -eq 0
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
 if ($Version -notmatch '^v\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
     throw "Version must look like v1.2.3, optionally with a suffix such as v1.2.3-beta.1."
 }
@@ -64,8 +76,7 @@ try {
         throw "Local $branch is not pushed to origin. Push the branch before creating the release."
     }
 
-    $existingReleases = & gh release list --limit 100 --json tagName | ConvertFrom-Json
-    if (@($existingReleases | Where-Object { $_.tagName -eq $Version }).Count -gt 0) {
+    if (Test-ReleaseExists $Version) {
         throw "Release $Version already exists."
     }
 
