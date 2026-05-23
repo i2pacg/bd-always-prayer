@@ -37,37 +37,8 @@
   "showMetadata": {
     "text": "Show title/source",
     "type": "checkbox",
-    "help": "Shows the optional title and source from quotes.json.",
+    "help": "Shows optional title and source metadata from the active prayers.",
     "value": true
-  },
-  "sourceLabel": {
-    "type": "label",
-    "value": "Data Source"
-  },
-  "dataSource": {
-    "type": "dropdown",
-    "value": 0,
-    "text": "Prayer source",
-    "help": "Choose bundled quotes.json or a remote prayers endpoint.",
-    "items": [
-      "Local quotes.json",
-      "Remote endpoint"
-    ]
-  },
-  "remoteEndpoint": {
-    "text": "Remote endpoint URL",
-    "type": "textbox",
-    "help": "Endpoint returning either an array of prayers or {\"prayers\": [...]}.",
-    "value": "https://prayer.ibrahimomer.net/quotes.json"
-  },
-  "remoteRefreshMinutes": {
-    "max": 120,
-    "min": 0,
-    "step": 1,
-    "text": "Remote refresh minutes",
-    "type": "slider",
-    "help": "How often to reload the remote endpoint. Use 0 to disable automatic refresh.",
-    "value": 15
   },
   "backgroundLabel": {
     "type": "label",

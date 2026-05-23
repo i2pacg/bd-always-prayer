@@ -11,6 +11,11 @@ const libraryClose = document.getElementById("libraryClose");
 const libraryList = document.getElementById("libraryList");
 const libraryEmpty = document.getElementById("libraryEmpty");
 const libraryCount = document.getElementById("libraryCount");
+const librarySourceSummary = document.getElementById("librarySourceSummary");
+const librarySourceLocal = document.getElementById("librarySourceLocal");
+const librarySourceRemote = document.getElementById("librarySourceRemote");
+const libraryRemoteForm = document.getElementById("libraryRemoteForm");
+const libraryRemoteEndpoint = document.getElementById("libraryRemoteEndpoint");
 const libraryForm = document.getElementById("libraryForm");
 const libraryEntryId = document.getElementById("libraryEntryId");
 const libraryEntryTitle = document.getElementById("libraryEntryTitle");
@@ -41,6 +46,7 @@ const libraryChoicePrimary = document.getElementById("libraryChoicePrimary");
 
 const arabicPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/;
 const localLibraryStorageKey = "bdAlwaysPrayer.localLibrary.v1";
+const sourceSettingsStorageKey = "bdAlwaysPrayer.sourceSettings.v1";
 const legacySavedPrayersStorageKey = "bdAlwaysPrayer.savedPrayers.v1";
 
 const state = {
@@ -165,6 +171,77 @@ async function loadRemoteQuotes() {
 
 async function loadQuotes() {
   return state.settings.dataSource === 1 ? loadRemoteQuotes() : [];
+}
+
+function loadSourceSettings() {
+  try {
+    const raw = window.localStorage.getItem(sourceSettingsStorageKey);
+    if (!raw) {
+      return;
+    }
+
+    const parsed = JSON.parse(raw);
+    state.settings.dataSource = parsed && Number(parsed.dataSource) === 1 ? 1 : 0;
+    if (typeof parsed.remoteEndpoint === "string" && parsed.remoteEndpoint.trim()) {
+      state.settings.remoteEndpoint = parsed.remoteEndpoint.trim();
+    }
+    if (Number.isFinite(Number(parsed.remoteRefreshMinutes))) {
+      state.settings.remoteRefreshMinutes = Math.max(0, Number(parsed.remoteRefreshMinutes));
+    }
+  } catch (error) {
+    setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+  }
+}
+
+function persistSourceSettings() {
+  window.localStorage.setItem(sourceSettingsStorageKey, JSON.stringify({
+    version: 1,
+    dataSource: state.settings.dataSource,
+    remoteEndpoint: state.settings.remoteEndpoint,
+    remoteRefreshMinutes: state.settings.remoteRefreshMinutes,
+    updatedAt: new Date().toISOString()
+  }, null, 2));
+}
+
+function renderSourceControls() {
+  const isRemote = state.settings.dataSource === 1;
+
+  librarySourceSummary.textContent = isRemote ? "Remote + local" : "Local library";
+  librarySourceLocal.classList.toggle("is-active", !isRemote);
+  librarySourceLocal.setAttribute("aria-pressed", String(!isRemote));
+  librarySourceRemote.classList.toggle("is-active", isRemote);
+  librarySourceRemote.setAttribute("aria-pressed", String(isRemote));
+  libraryRemoteForm.hidden = !isRemote;
+  libraryRemoteEndpoint.value = state.settings.remoteEndpoint;
+}
+
+async function setPrayerSource(source) {
+  const nextSource = source === "remote" ? 1 : 0;
+  if (state.settings.dataSource === nextSource) {
+    renderSourceControls();
+    return;
+  }
+
+  state.settings.dataSource = nextSource;
+  persistSourceSettings();
+  renderSourceControls();
+  await reloadQuotes();
+}
+
+async function refreshRemoteSourceFromForm() {
+  const endpoint = libraryRemoteEndpoint.value.trim();
+  if (!endpoint) {
+    setLibraryStatus("Remote endpoint URL is empty.", true);
+    focusEditableControl(libraryRemoteEndpoint);
+    return;
+  }
+
+  state.settings.remoteEndpoint = endpoint;
+  state.settings.dataSource = 1;
+  persistSourceSettings();
+  renderSourceControls();
+  await reloadQuotes();
+  setLibraryStatus("Remote source refreshed.");
 }
 
 function createPrayerId() {
@@ -650,6 +727,7 @@ function installEditableFocusBridge() {
     libraryEntryLang,
     libraryEntryDir,
     libraryEntryLines,
+    libraryRemoteEndpoint,
     libraryEndpointUrl
   ];
 
@@ -1030,11 +1108,27 @@ function closeLibraryPanel() {
 function initLibraryManager() {
   state.savedPrayers = readSavedPrayers();
   persistSavedPrayers();
+  renderSourceControls();
   fillLibraryForm(state.savedPrayers[0] || null);
 
   libraryToggle.addEventListener("click", openLibraryPanel);
   libraryBackdrop.addEventListener("click", closeLibraryPanel);
   libraryClose.addEventListener("click", closeLibraryPanel);
+  librarySourceLocal.addEventListener("click", () => {
+    setPrayerSource("local").catch((error) => showError(error));
+  });
+  librarySourceRemote.addEventListener("click", () => {
+    setPrayerSource("remote").catch((error) => showError(error));
+  });
+  libraryRemoteForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    refreshRemoteSourceFromForm().catch((error) => showError(error));
+  });
+  libraryRemoteEndpoint.addEventListener("change", () => {
+    state.settings.remoteEndpoint = libraryRemoteEndpoint.value.trim() || state.settings.remoteEndpoint;
+    persistSourceSettings();
+    renderSourceControls();
+  });
   libraryNew.addEventListener("click", () => {
     fillLibraryForm(null);
     focusPrimaryEditorField(true);
@@ -1110,6 +1204,7 @@ function handleResize() {
 
 async function start() {
   try {
+    loadSourceSettings();
     applySettings();
     state.localSeedQuotes = await loadLocalQuotes();
     initLibraryManager();
@@ -1184,20 +1279,9 @@ window.livelyPropertyListener = function livelyPropertyListener(name, value) {
       state.settings.showMetadata = toBoolean(value);
       break;
     case "dataSource":
-      state.settings.dataSource = Math.round(toNumber(value, 0));
-      reloadQuotes();
-      return;
     case "remoteEndpoint":
-      state.settings.remoteEndpoint = typeof value === "string" ? value.trim() : String(value || "").trim();
-      if (state.settings.dataSource === 1) {
-        reloadQuotes();
-        return;
-      }
-      break;
     case "remoteRefreshMinutes":
-      state.settings.remoteRefreshMinutes = Math.max(0, toNumber(value, 15));
-      restartRefreshTimer();
-      break;
+      return;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);
       break;

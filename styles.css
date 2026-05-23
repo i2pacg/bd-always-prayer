@@ -545,13 +545,69 @@ body.library-open .library-toggle {
 
 .library-list-pane {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   gap: 14px;
   min-height: 0;
   padding: 18px;
   border-right: 1px solid rgba(246, 246, 238, 0.09);
   overflow: visible;
   overscroll-behavior: contain;
+}
+
+.library-source {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(246, 246, 238, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.library-source-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.library-source-heading span {
+  color: rgba(236, 236, 228, 0.58);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.library-source-heading strong {
+  color: rgba(248, 248, 241, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.library-source-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.library-source-toggle button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(246, 246, 238, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(248, 248, 241, 0.72);
+  cursor: pointer;
+  font-family: "Montserrat Local", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.library-source-toggle button:hover,
+.library-source-toggle button:focus-visible,
+.library-source-toggle button.is-active {
+  border-color: rgba(177, 211, 204, 0.32);
+  background: rgba(90, 124, 118, 0.15);
+  color: rgba(248, 248, 241, 0.95);
 }
 
 .library-submit-row {
@@ -670,13 +726,19 @@ body.library-open .library-toggle {
   display: none;
 }
 
-.library-endpoint-import {
+.library-endpoint-import,
+.library-remote-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 76px;
   gap: 8px;
 }
 
-.library-endpoint-import input {
+.library-remote-form[hidden] {
+  display: none;
+}
+
+.library-endpoint-import input,
+.library-remote-form input {
   width: 100%;
   height: 36px;
   min-width: 0;
@@ -693,12 +755,14 @@ body.library-open .library-toggle {
   user-select: text;
 }
 
-.library-endpoint-import input:focus {
+.library-endpoint-import input:focus,
+.library-remote-form input:focus {
   border-color: rgba(177, 211, 204, 0.42);
   background: rgba(255, 255, 255, 0.065);
 }
 
-.library-load-button {
+.library-load-button,
+.library-refresh-button {
   padding: 0 9px;
 }
 
@@ -796,7 +860,8 @@ body.library-open .library-toggle {
 
 .library-form input,
 .library-form textarea,
-.library-endpoint-import input {
+.library-endpoint-import input,
+.library-remote-form input {
   cursor: text;
 }
 
@@ -824,6 +889,7 @@ body.library-open .library-toggle {
 .library-close:focus-visible,
 .library-list button:focus-visible,
 .library-tool-button:focus-visible,
+.library-source-toggle button:focus-visible,
 .library-submit-row button:focus-visible,
 .library-choice button:focus-visible {
   outline: 2px solid rgba(177, 211, 204, 0.5);
@@ -991,7 +1057,7 @@ body.library-open .library-toggle {
   }
 
   .library-list-pane {
-    grid-template-rows: auto auto minmax(0, auto) auto;
+    grid-template-rows: auto auto auto minmax(0, auto) auto;
     gap: 10px;
     padding: 14px;
     border-right: 0;

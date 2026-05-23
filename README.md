@@ -18,12 +18,12 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 466.4 KB <!-- /zip-size -->
+1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 467.1 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
 
-This keeps all visual controls: quote interval, text scale, palette, particles, background brightness, remote endpoint URL, and refresh timing.
+This keeps visual controls: quote interval, text scale, palette, particles, background brightness, and animation.
 
 ### Alternative: URL wallpaper
 
@@ -51,17 +51,20 @@ Zip installs expose these through Lively's Customize panel:
 | --- | --- |
 | Timing | Quote interval |
 | Text | Text scale, opacity, title/source visibility |
-| Data | Bundled file or remote endpoint, endpoint URL, refresh minutes |
 | Background | Motion, palette intensity, palette mode, brightness |
 | Particles | Density and glow |
 | Motion | Animation on/off |
 
 Settings are defined in [`LivelyProperties.json`](LivelyProperties.json).
 
+Prayer source settings live inside the wallpaper panel, not in Lively Customize. This avoids split control between zip installs and URL installs.
+
 ### Local library inside the wallpaper
 
 The small top-right control opens the local library editor. On first run, it reads the bundled [`quotes.json`](quotes.json), loads those prayers into the editor, and saves that editable copy in browser storage. From there, you can build on it directly.
 
+- Choose the active prayer source: local library or remote endpoint plus local library.
+- Edit the remote endpoint URL and refresh it from the same panel.
 - Edit prayers that originally came from `quotes.json`.
 - Add a new local prayer.
 - Delete local prayers.
