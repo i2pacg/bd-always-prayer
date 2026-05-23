@@ -4,6 +4,7 @@ const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
 let syncPreviewControls = function syncPreviewControlsNoop() {};
+const PREVIEW_ASSET_VERSION = "20260523-preview-controls";
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
 const librarySheet = document.getElementById("librarySheet");
@@ -1335,7 +1336,7 @@ function initPreviewControls() {
     return;
   }
 
-  import("./preview-controls.js")
+  import(`./preview-controls.js?v=${PREVIEW_ASSET_VERSION}`)
     .then(() => {
       const initPreviewSettings = window.bdAlwaysPrayerInitPreviewControls;
       if (typeof initPreviewSettings !== "function") {

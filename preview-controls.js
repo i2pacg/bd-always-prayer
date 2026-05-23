@@ -5,7 +5,7 @@ function loadPreviewStylesheet() {
 
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "preview-controls.css";
+  link.href = "preview-controls.css?v=20260523-preview-controls";
   link.dataset.previewControls = "true";
   document.head.appendChild(link);
 }
