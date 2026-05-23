@@ -66,6 +66,7 @@ for ($Index = 0; $Index -lt $Quotes.Count; $Index++) {
 
 Read-JsonFile "LivelyProperties.json" | Out-Null
 node --check (Join-Path $Root "script.js") | Out-Null
+node --check (Join-Path $Root "preview-controls.js") | Out-Null
 
 Write-Output "Validation passed."
 

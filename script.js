@@ -3,9 +3,7 @@ const quoteText = document.getElementById("quoteText");
 const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
-const previewToggle = document.getElementById("previewToggle");
-const previewPanel = document.getElementById("previewPanel");
-const previewClose = document.getElementById("previewClose");
+let syncPreviewControls = function syncPreviewControlsNoop() {};
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
 const librarySheet = document.getElementById("librarySheet");
@@ -1332,64 +1330,27 @@ function getPreviewSettingValue(name) {
   }
 }
 
-function syncPreviewControls() {
-  if (!previewPanel || !previewToggle || previewToggle.hidden) {
-    return;
-  }
-
-  previewPanel.querySelectorAll("[data-preview-setting]").forEach((control) => {
-    const value = getPreviewSettingValue(control.dataset.previewSetting);
-    if (control.type === "checkbox") {
-      control.checked = Boolean(value);
-    } else {
-      control.value = String(value);
-    }
-  });
-}
-
 function initPreviewControls() {
-  if (!previewToggle || !previewPanel || !previewClose || !isGithubPagesPreview()) {
+  if (!isGithubPagesPreview()) {
     return;
   }
 
-  previewToggle.hidden = false;
-  previewToggle.addEventListener("click", () => {
-    previewPanel.hidden = !previewPanel.hidden;
-    document.body.classList.toggle("preview-open", !previewPanel.hidden);
-    syncPreviewControls();
-  });
-  previewClose.addEventListener("click", () => {
-    previewPanel.hidden = true;
-    document.body.classList.remove("preview-open");
-    previewToggle.focus({ preventScroll: true });
-  });
-  previewPanel.addEventListener("input", (event) => {
-    const control = event.target;
-    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement) || !control.dataset.previewSetting) {
-      return;
-    }
-    if (control.type !== "range") {
-      return;
-    }
+  import("./preview-controls.js")
+    .then(() => {
+      const initPreviewSettings = window.bdAlwaysPrayerInitPreviewControls;
+      if (typeof initPreviewSettings !== "function") {
+        return;
+      }
 
-    applyControlSetting(control.dataset.previewSetting, control.value);
-  });
-  previewPanel.addEventListener("change", (event) => {
-    const control = event.target;
-    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement) || !control.dataset.previewSetting) {
-      return;
-    }
-
-    applyControlSetting(control.dataset.previewSetting, control.type === "checkbox" ? control.checked : control.value);
-  });
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !previewPanel.hidden) {
-      previewPanel.hidden = true;
-      document.body.classList.remove("preview-open");
-      previewToggle.focus({ preventScroll: true });
-    }
-  });
-  syncPreviewControls();
+      syncPreviewControls = initPreviewSettings({
+        applySetting: applyControlSetting,
+        getSetting: getPreviewSettingValue
+      });
+      syncPreviewControls();
+    })
+    .catch(() => {
+      syncPreviewControls = function syncPreviewControlsUnavailable() {};
+    });
 }
 
 window.livelyPropertyListener = function livelyPropertyListener(name, value) {

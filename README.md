@@ -18,7 +18,7 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 468.7 KB <!-- /zip-size -->
+1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 467.6 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
@@ -39,7 +39,7 @@ Use this when you want the wallpaper code to auto-update whenever the page reloa
 
 URL wallpapers do not load `LivelyProperties.json`, so Lively's Customize panel will not appear. The wallpaper uses its built-in defaults instead.
 
-The GitHub Pages live preview adds a small preview-only settings button when opened with `?preview=1`. That mirrors the visual Lively controls for browser testing only; the normal URL wallpaper above stays clean.
+The GitHub Pages live preview adds a small preview-only settings button when opened with `?preview=1`. That mirrors the visual Lively controls for browser testing only; the normal URL wallpaper above stays clean, and the preview helper files are not included in the Lively zip.
 
 ---
 

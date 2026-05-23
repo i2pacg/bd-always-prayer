@@ -99,6 +99,8 @@ if (-not $SkipPagesProbe) {
             "",
             "styles.css",
             "script.js",
+            "preview-controls.js",
+            "preview-controls.css",
             "particles.js",
             "quotes.json",
             "LivelyInfo.json",
