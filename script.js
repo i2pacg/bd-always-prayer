@@ -35,10 +35,7 @@ const libraryDeleteAll = document.getElementById("libraryDeleteAll");
 const libraryExport = document.getElementById("libraryExport");
 const libraryImportDefault = document.getElementById("libraryImportDefault");
 const libraryImport = document.getElementById("libraryImport");
-const libraryImportEndpoint = document.getElementById("libraryImportEndpoint");
 const libraryImportInput = document.getElementById("libraryImportInput");
-const libraryEndpointImport = document.getElementById("libraryEndpointImport");
-const libraryEndpointUrl = document.getElementById("libraryEndpointUrl");
 const libraryChoice = document.getElementById("libraryChoice");
 const libraryChoiceTitle = document.getElementById("libraryChoiceTitle");
 const libraryChoiceMessage = document.getElementById("libraryChoiceMessage");
@@ -219,7 +216,7 @@ function persistSourceSettings() {
 function renderSourceControls() {
   const isRemote = state.settings.dataSource === 1;
 
-  librarySourceSummary.textContent = isRemote ? "Remote endpoint, then local library" : "Local library only";
+  librarySourceSummary.textContent = isRemote ? "Live URL first, saved prayers after." : "Saved prayers on this device.";
   librarySourceLocal.classList.toggle("is-active", !isRemote);
   librarySourceLocal.setAttribute("aria-pressed", String(!isRemote));
   librarySourceRemote.classList.toggle("is-active", isRemote);
@@ -254,7 +251,7 @@ async function refreshRemoteSourceFromForm() {
   persistSourceSettings();
   renderSourceControls();
   await reloadQuotes();
-  setLibraryStatus("Remote source refreshed.");
+  setLibraryStatus("Live source updated.");
 }
 
 function createPrayerId() {
@@ -752,8 +749,7 @@ function installEditableFocusBridge() {
     libraryEntryLang,
     libraryEntryDir,
     libraryEntryLines,
-    libraryRemoteEndpoint,
-    libraryEndpointUrl
+    libraryRemoteEndpoint
   ];
 
   editableControls.forEach((control) => {
@@ -1087,28 +1083,6 @@ function runLibraryChoice(actionName) {
   }
 }
 
-async function importEndpointPrayers(url) {
-  const endpoint = url.trim();
-  if (!endpoint) {
-    throw new Error("Endpoint URL is empty.");
-  }
-
-  const data = await fetchJson(endpoint);
-  const entries = getImportEntries(data);
-  const imported = normalizeImportEntries(entries);
-
-  askImportMode({
-    title: "Import API prayers",
-    message: `Found ${imported.length} prayer${imported.length === 1 ? "" : "s"} from this endpoint.`,
-    entries: imported,
-    replaceStatus: "Replaced with",
-    addStatus: "Added",
-    onDone: () => {
-      libraryEndpointImport.hidden = true;
-    }
-  });
-}
-
 function openLibraryPanel() {
   state.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   libraryPanel.hidden = false;
@@ -1163,20 +1137,6 @@ function initLibraryManager() {
   libraryExport.addEventListener("click", exportSavedPrayers);
   libraryImportDefault.addEventListener("click", importDefaultPrayers);
   libraryImport.addEventListener("click", () => libraryImportInput.click());
-  libraryImportEndpoint.addEventListener("click", () => {
-    libraryEndpointImport.hidden = !libraryEndpointImport.hidden;
-    if (!libraryEndpointImport.hidden) {
-      focusEditableControl(libraryEndpointUrl, true);
-    }
-  });
-  libraryEndpointImport.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    try {
-      await importEndpointPrayers(libraryEndpointUrl.value);
-    } catch (error) {
-      setLibraryStatus(error instanceof Error ? error.message : String(error), true);
-    }
-  });
   libraryChoiceCancel.addEventListener("click", closeLibraryChoice);
   libraryChoicePrimary.addEventListener("click", () => runLibraryChoice("onPrimary"));
   libraryChoiceSecondary.addEventListener("click", () => runLibraryChoice("onSecondary"));
