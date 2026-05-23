@@ -25,6 +25,22 @@ Use this when you want the full Lively **Customize** panel.
 
 This keeps visual controls: quote interval, text scale, theme, palette, particles, background brightness, and animation.
 
+### Updates and releases
+
+Use the stable Pages zip when you want the newest published build:
+
+```text
+https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip
+```
+
+Use GitHub Releases when you want a specific version, rollback build, or release notes:
+
+```text
+https://github.com/i2pacg/bd-always-prayer/releases
+```
+
+To update a zip install, download the newer zip and drag it into Lively again. If you use the URL wallpaper option below, the wallpaper code updates whenever Lively reloads the page, but Lively's Customize panel is not available for URL wallpapers.
+
 ### Alternative: URL wallpaper
 
 Use this when you want the wallpaper code to auto-update whenever the page reloads.
@@ -238,6 +254,11 @@ If GitHub Pages has not published yet or is unavailable, use `npm run ship:offli
 4. Confirm `dist/bd-always-prayer-lively.zip` changed when packaging changed.
 5. Commit the source changes, README stamp, and zip together.
 6. Push `master`.
+7. Create a GitHub Release when the update should be versioned for users:
+
+   ```powershell
+   npm run release:github -- -Version v1.2.3
+   ```
 
 ### GitHub Releases without Actions
 
@@ -248,6 +269,8 @@ npm run release:github -- -Version v1.2.3
 ```
 
 The release helper runs the ship pipeline, checks that the working tree is clean, verifies the current branch is pushed, creates an annotated tag, pushes it, and uploads `dist/bd-always-prayer-lively.zip` to the GitHub Release. Add `-Draft` or `-Prerelease` when needed. Use `-SkipShip` only after a successful `npm run ship` on the same commit.
+
+Release assets are versioned downloads. The Pages zip remains the moving "latest stable" download.
 
 ---
 
