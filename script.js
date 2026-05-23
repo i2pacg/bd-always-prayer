@@ -4,7 +4,7 @@ const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
 let syncPreviewControls = function syncPreviewControlsNoop() {};
-const PREVIEW_ASSET_VERSION = "20260523-preview-controls";
+const PREVIEW_ASSET_VERSION = "20260523-light-mode";
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
 const librarySheet = document.getElementById("librarySheet");
@@ -62,6 +62,7 @@ const state = {
   settings: {
     intervalSeconds: 12,
     textScale: 1,
+    themeMode: 0,
     backgroundMotion: 0.7,
     paletteIntensity: 0.85,
     paletteMode: 0,
@@ -83,6 +84,16 @@ const state = {
 };
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
+const themeClasses = ["theme-dark", "theme-light", "theme-auto"];
+const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: light)");
+
+function effectiveThemeMode() {
+  if (state.settings.themeMode === 2) {
+    return colorSchemeQuery.matches ? 1 : 0;
+  }
+
+  return state.settings.themeMode === 1 ? 1 : 0;
+}
 
 function trimLineEdges(lines) {
   const cleanLines = lines.map((line) => (typeof line === "string" ? line.trimEnd() : ""));
@@ -465,15 +476,26 @@ function applyQuote(quote) {
 function applySettings() {
   const root = document.documentElement;
   const motionScale = Math.max(0.15, state.settings.backgroundMotion * 1.25);
+  const effectiveTheme = effectiveThemeMode();
+  const isLightTheme = effectiveTheme === 1;
   root.style.setProperty("--motion-scale", String(motionScale));
   root.style.setProperty("--palette-intensity", String(state.settings.paletteIntensity));
-  root.style.setProperty("--background-dim", String((100 - state.settings.backgroundBrightness) / 100));
+  root.style.setProperty(
+    "--background-dim",
+    String(isLightTheme
+      ? 0.14 + state.settings.backgroundBrightness / 170
+      : (100 - state.settings.backgroundBrightness) / 100)
+  );
   root.style.setProperty("--text-opacity", String(state.settings.textOpacity));
   root.style.setProperty("--text-scale", String(state.settings.textScale));
   root.style.setProperty("--meta-display", state.settings.showMetadata ? "block" : "none");
 
   document.body.classList.toggle("motion-disabled", !state.settings.enableAnimation);
   document.body.classList.toggle("background-paused", state.settings.backgroundMotion <= 0.01);
+  document.body.classList.remove(...themeClasses);
+  document.body.classList.add(themeClasses[state.settings.themeMode] || themeClasses[0]);
+  document.body.classList.toggle("theme-light", isLightTheme);
+  document.body.classList.toggle("theme-dark", !isLightTheme);
   document.body.classList.remove(...paletteClasses);
   document.body.classList.add(paletteClasses[state.settings.paletteMode] || paletteClasses[0]);
 
@@ -484,7 +506,8 @@ function applySettings() {
       glow: state.settings.particleGlow,
       motion: state.settings.backgroundMotion,
       paletteMode: state.settings.paletteMode,
-      brightness: state.settings.backgroundBrightness
+      brightness: state.settings.backgroundBrightness,
+      themeMode: effectiveTheme
     });
   }
 
@@ -1256,6 +1279,9 @@ function applyControlSetting(name, value) {
     case "textScale":
       state.settings.textScale = Math.max(0.7, toNumber(value, 100) / 100);
       break;
+    case "themeMode":
+      state.settings.themeMode = Math.min(2, Math.max(0, Math.round(toNumber(value, 0))));
+      break;
     case "backgroundMotion":
       state.settings.backgroundMotion = Math.max(0, toNumber(value, 70) / 100);
       break;
@@ -1308,6 +1334,8 @@ function getPreviewSettingValue(name) {
       return state.settings.intervalSeconds;
     case "textScale":
       return Math.round(state.settings.textScale * 100);
+    case "themeMode":
+      return state.settings.themeMode;
     case "textOpacity":
       return Math.round(state.settings.textOpacity * 100);
     case "backgroundMotion":
@@ -1357,6 +1385,12 @@ function initPreviewControls() {
 window.livelyPropertyListener = function livelyPropertyListener(name, value) {
   applyControlSetting(name, value);
 };
+
+if (typeof colorSchemeQuery.addEventListener === "function") {
+  colorSchemeQuery.addEventListener("change", applySettings);
+} else if (typeof colorSchemeQuery.addListener === "function") {
+  colorSchemeQuery.addListener(applySettings);
+}
 
 initPreviewControls();
 start();

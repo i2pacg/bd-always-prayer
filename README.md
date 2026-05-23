@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)](LivelyInfo.json)
 [![Last commit](https://img.shields.io/github/last-commit/i2pacg/bd-always-prayer?color=informational)](https://github.com/i2pacg/bd-always-prayer/commits/master)
 
-Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister/lively). It rotates Arabic and English prayers over a dark animated gradient with an adaptive particle field, exact line control, self-hosted fonts, optional remote data, and an in-wallpaper editor for the local prayer library.
+Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister/lively). It rotates Arabic and English prayers over an animated gradient with dark and light themes, an adaptive particle field, exact line control, self-hosted fonts, optional remote data, and an in-wallpaper editor for the local prayer library.
 
 **Live preview:** <https://i2pacg.github.io/bd-always-prayer/?preview=1>
 
@@ -18,12 +18,12 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 467.7 KB <!-- /zip-size -->
+1. Download [bd-always-prayer-lively.zip](https://i2pacg.github.io/bd-always-prayer/dist/bd-always-prayer-lively.zip) <!-- zip-size --> 469.6 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
 
-This keeps visual controls: quote interval, text scale, palette, particles, background brightness, and animation.
+This keeps visual controls: quote interval, text scale, theme, palette, particles, background brightness, and animation.
 
 ### Alternative: URL wallpaper
 
@@ -53,7 +53,7 @@ Zip installs expose these through Lively's Customize panel:
 | --- | --- |
 | Timing | Quote interval |
 | Text | Text scale, opacity, title/source visibility |
-| Background | Motion, palette intensity, palette mode, brightness |
+| Background | Theme, motion, palette intensity, palette mode, brightness |
 | Particles | Density and glow |
 | Motion | Animation on/off |
 
@@ -214,6 +214,9 @@ npm run package
 
 # JSON and JavaScript syntax checks only.
 npm run validate
+
+# Create a versioned GitHub Release after committing and pushing.
+npm run release:github -- -Version v1.2.3
 ```
 
 `npm run ship` runs:
@@ -235,6 +238,16 @@ If GitHub Pages has not published yet or is unavailable, use `npm run ship:offli
 4. Confirm `dist/bd-always-prayer-lively.zip` changed when packaging changed.
 5. Commit the source changes, README stamp, and zip together.
 6. Push `master`.
+
+### GitHub Releases without Actions
+
+Releases are created locally with GitHub CLI, not GitHub Actions:
+
+```powershell
+npm run release:github -- -Version v1.2.3
+```
+
+The release helper runs the ship pipeline, checks that the working tree is clean, verifies the current branch is pushed, creates an annotated tag, pushes it, and uploads `dist/bd-always-prayer-lively.zip` to the GitHub Release. Add `-Draft` or `-Prerelease` when needed. Use `-SkipShip` only after a successful `npm run ship` on the same commit.
 
 ---
 

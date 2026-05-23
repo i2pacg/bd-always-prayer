@@ -44,6 +44,17 @@
     "type": "label",
     "value": "Background"
   },
+  "themeMode": {
+    "type": "dropdown",
+    "value": 0,
+    "text": "Theme",
+    "help": "Choose a dark wallpaper, a light wallpaper, or follow the system color scheme.",
+    "items": [
+      "Dark",
+      "Light",
+      "Match System"
+    ]
+  },
   "backgroundMotion": {
     "max": 140,
     "min": 0,

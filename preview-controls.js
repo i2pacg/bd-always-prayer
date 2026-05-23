@@ -5,7 +5,7 @@ function loadPreviewStylesheet() {
 
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "preview-controls.css?v=20260523-preview-controls";
+  link.href = "preview-controls.css?v=20260523-light-mode";
   link.dataset.previewControls = "true";
   document.head.appendChild(link);
 }
@@ -46,6 +46,14 @@ function createPreviewControls() {
           <label>
             <span>Text opacity</span>
             <input data-preview-setting="textOpacity" type="range" min="45" max="100" step="1">
+          </label>
+          <label>
+            <span>Theme</span>
+            <select data-preview-setting="themeMode">
+              <option value="0">Dark</option>
+              <option value="1">Light</option>
+              <option value="2">Match System</option>
+            </select>
           </label>
           <label>
             <span>Motion</span>

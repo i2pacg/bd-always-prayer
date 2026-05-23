@@ -31,6 +31,20 @@ body.preview-open .preview-toggle {
   background: rgba(11, 14, 15, 0.62);
 }
 
+body.theme-light .preview-toggle {
+  border-color: rgba(24, 34, 32, 0.14);
+  background: rgba(255, 255, 255, 0.38);
+  color: rgba(28, 38, 36, 0.78);
+  box-shadow: 0 16px 42px rgba(74, 88, 82, 0.14);
+}
+
+body.theme-light .preview-toggle:hover,
+body.theme-light .preview-toggle:focus-visible,
+body.theme-light.preview-open .preview-toggle {
+  border-color: rgba(24, 34, 32, 0.24);
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .preview-toggle svg {
   width: 18px;
   height: 18px;
@@ -65,6 +79,14 @@ body.preview-open .preview-toggle {
   backdrop-filter: blur(18px);
 }
 
+body.theme-light .preview-card {
+  border-color: rgba(28, 38, 34, 0.12);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 252, 0.96), rgba(236, 241, 237, 0.94)),
+    rgba(246, 248, 244, 0.94);
+  box-shadow: 0 24px 72px rgba(80, 94, 88, 0.2);
+}
+
 .preview-header {
   display: flex;
   align-items: center;
@@ -74,9 +96,18 @@ body.preview-open .preview-toggle {
   border-bottom: 1px solid rgba(246, 246, 238, 0.08);
 }
 
+body.theme-light .preview-header {
+  border-color: rgba(28, 38, 34, 0.09);
+}
+
 .preview-header h2,
 .preview-header p {
   margin: 0;
+}
+
+body.theme-light .preview-header p,
+body.theme-light .preview-controls label span {
+  color: rgba(54, 66, 62, 0.58);
 }
 
 .preview-header h2 {
@@ -100,6 +131,14 @@ body.preview-open .preview-toggle {
   background: rgba(255, 255, 255, 0.04);
   color: rgba(246, 246, 238, 0.72);
   cursor: pointer;
+}
+
+body.theme-light .preview-close,
+body.theme-light .preview-controls select,
+body.theme-light .preview-switches label {
+  border-color: rgba(28, 38, 34, 0.12);
+  background: rgba(255, 255, 255, 0.56);
+  color: rgba(28, 34, 32, 0.84);
 }
 
 .preview-close span {
@@ -155,6 +194,12 @@ body.preview-open .preview-toggle {
   background: rgba(255, 255, 255, 0.045);
   color: rgba(248, 248, 241, 0.9);
   font-family: "Montserrat Local", "Segoe UI", sans-serif;
+}
+
+body.theme-light .preview-controls select:focus-visible,
+body.theme-light .preview-switches label:focus-within {
+  border-color: rgba(70, 130, 124, 0.28);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .preview-switches {

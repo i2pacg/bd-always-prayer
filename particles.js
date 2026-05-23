@@ -17,11 +17,12 @@ const particleState = {
     glow: 62,
     motion: 0.7,
     paletteMode: 0,
-    brightness: 28
+    brightness: 28,
+    themeMode: 0
   }
 };
 
-const particlePalettes = [
+const darkParticlePalettes = [
   ["rgba(178, 217, 218,", "rgba(148, 168, 210,", "rgba(190, 186, 162,"],
   ["rgba(210, 214, 214,", "rgba(145, 154, 160,", "rgba(188, 178, 160,"],
   ["rgba(118, 205, 204,", "rgba(105, 151, 176,", "rgba(170, 190, 160,"],
@@ -29,12 +30,21 @@ const particlePalettes = [
   ["rgba(120, 205, 166,", "rgba(130, 170, 198,", "rgba(178, 198, 130,"]
 ];
 
+const lightParticlePalettes = [
+  ["rgba(64, 132, 142,", "rgba(106, 102, 166,", "rgba(134, 154, 100,"],
+  ["rgba(96, 106, 108,", "rgba(120, 126, 132,", "rgba(142, 128, 106,"],
+  ["rgba(34, 128, 142,", "rgba(60, 118, 146,", "rgba(104, 148, 106,"],
+  ["rgba(106, 96, 166,", "rgba(148, 92, 154,", "rgba(150, 128, 96,"],
+  ["rgba(46, 138, 98,", "rgba(72, 126, 154,", "rgba(116, 148, 70,"]
+];
+
 function clampParticle(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
 function activeParticlePalette() {
-  return particlePalettes[particleState.settings.paletteMode] || particlePalettes[0];
+  const palettes = particleState.settings.themeMode === 1 ? lightParticlePalettes : darkParticlePalettes;
+  return palettes[particleState.settings.paletteMode] || palettes[0];
 }
 
 function targetParticleCount() {
@@ -134,7 +144,9 @@ function drawConnection(first, second, alpha) {
   particleContext.beginPath();
   particleContext.moveTo(first.x, first.y);
   particleContext.lineTo(second.x, second.y);
-  particleContext.strokeStyle = `rgba(226, 232, 224, ${alpha})`;
+  particleContext.strokeStyle = particleState.settings.themeMode === 1
+    ? `rgba(38, 58, 54, ${alpha * 1.4})`
+    : `rgba(226, 232, 224, ${alpha})`;
   particleContext.lineWidth = 0.45;
   particleContext.stroke();
 }
@@ -148,7 +160,8 @@ function drawSanctuary(centerX, centerY, elapsed) {
   particleContext.save();
   particleContext.translate(centerX, centerY);
   particleContext.rotate(time);
-  particleContext.strokeStyle = `rgba(234, 238, 226, ${0.018 + glow * 0.028})`;
+  const sanctuaryColor = particleState.settings.themeMode === 1 ? "34, 52, 48" : "234, 238, 226";
+  particleContext.strokeStyle = `rgba(${sanctuaryColor}, ${0.018 + glow * 0.028})`;
   particleContext.lineWidth = 0.75;
 
   for (let ring = 0; ring < 3; ring += 1) {
@@ -170,9 +183,9 @@ function drawSanctuary(centerX, centerY, elapsed) {
   particleContext.restore();
 
   const verticalGradient = particleContext.createLinearGradient(centerX, centerY - minSide * 0.34, centerX, centerY + minSide * 0.34);
-  verticalGradient.addColorStop(0, "rgba(236, 240, 224, 0)");
-  verticalGradient.addColorStop(0.5, `rgba(236, 240, 224, ${0.04 + glow * 0.035})`);
-  verticalGradient.addColorStop(1, "rgba(236, 240, 224, 0)");
+  verticalGradient.addColorStop(0, `rgba(${sanctuaryColor}, 0)`);
+  verticalGradient.addColorStop(0.5, `rgba(${sanctuaryColor}, ${0.04 + glow * 0.035})`);
+  verticalGradient.addColorStop(1, `rgba(${sanctuaryColor}, 0)`);
   particleContext.strokeStyle = verticalGradient;
   particleContext.lineWidth = 1;
   particleContext.beginPath();
@@ -192,7 +205,9 @@ function drawSanctuary(centerX, centerY, elapsed) {
       : `${Math.max(12, glyph.size * 0.32)}px "Montserrat Local", sans-serif`;
     particleContext.textAlign = "center";
     particleContext.textBaseline = "middle";
-    particleContext.fillStyle = `rgba(240, 238, 222, ${glyph.opacity * glow})`;
+    particleContext.fillStyle = particleState.settings.themeMode === 1
+      ? `rgba(30, 44, 40, ${glyph.opacity * glow * 1.15})`
+      : `rgba(240, 238, 222, ${glyph.opacity * glow})`;
     particleContext.fillText(glyph.text, 0, 0);
     particleContext.restore();
   }
@@ -262,7 +277,9 @@ function drawParticles(timestamp = 0) {
     particleContext.arc(particle.x, particle.y, size * 7.5, 0, Math.PI * 2);
     particleContext.fill();
 
-    particleContext.fillStyle = `rgba(246, 248, 239, ${alpha * 0.42})`;
+    particleContext.fillStyle = particleState.settings.themeMode === 1
+      ? `rgba(34, 46, 42, ${alpha * 0.28})`
+      : `rgba(246, 248, 239, ${alpha * 0.42})`;
     particleContext.beginPath();
     particleContext.arc(particle.x, particle.y, size, 0, Math.PI * 2);
     particleContext.fill();
