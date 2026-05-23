@@ -13,10 +13,10 @@ $ZipPath = Join-Path $Root "dist\bd-always-prayer-lively.zip"
 $ShipScript = Join-Path $PSScriptRoot "ship.ps1"
 
 function Run-Git {
-    param([string[]]$Args)
-    $output = & git @Args
+    param([string[]]$GitArgs)
+    $output = & git @GitArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "git $($Args -join ' ') failed."
+        throw "git $($GitArgs -join ' ') failed."
     }
     return $output
 }
