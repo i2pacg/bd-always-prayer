@@ -64,8 +64,8 @@ try {
         throw "Local $branch is not pushed to origin. Push the branch before creating the release."
     }
 
-    $existingRelease = & gh release view $Version --json tagName 2>$null
-    if ($LASTEXITCODE -eq 0 -and $existingRelease) {
+    $existingReleases = & gh release list --limit 100 --json tagName | ConvertFrom-Json
+    if (@($existingReleases | Where-Object { $_.tagName -eq $Version }).Count -gt 0) {
         throw "Release $Version already exists."
     }
 
