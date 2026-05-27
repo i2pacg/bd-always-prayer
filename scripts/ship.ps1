@@ -1,5 +1,4 @@
 param(
-    [switch]$SkipRemoteProbe,
     [switch]$SkipPagesProbe
 )
 
@@ -10,7 +9,6 @@ $Packager = Join-Path $PSScriptRoot "package-lively.ps1"
 $ZipPath = Join-Path $Root "dist\bd-always-prayer-lively.zip"
 $IndexPath = Join-Path $Root "index.html"
 $ReadmePath = Join-Path $Root "README.md"
-$RemoteUrl = "https://prayer.ibrahimomer.net/quotes.json"
 $PagesUrl = "https://i2pacg.github.io/bd-always-prayer/"
 
 $failures = @()
@@ -32,7 +30,8 @@ function Step {
 
 Step "Validate JSON and script.js" {
     & $Packager -ValidateOnly | Out-Null
-    "JSON + script.js syntax OK"
+    & (Join-Path $PSScriptRoot "validate-local-only.ps1") | Out-Null
+    "JSON + script.js syntax OK; local-only source OK"
 }
 
 Step "Check referenced assets exist" {
@@ -62,35 +61,6 @@ Step "Check referenced assets exist" {
         throw "Missing assets referenced from HTML/CSS: $($missing -join ', ')"
     }
     "$(($refs | Sort-Object -Unique).Count) local references all resolve"
-}
-
-if (-not $SkipRemoteProbe) {
-    Step "Probe remote endpoint ($RemoteUrl)" {
-        try {
-            $r = Invoke-WebRequest -Uri $RemoteUrl -UseBasicParsing -TimeoutSec 10
-        } catch {
-            throw "Could not reach $RemoteUrl - $($_.Exception.Message)"
-        }
-        if ($r.StatusCode -ne 200) { throw "HTTP $($r.StatusCode)" }
-
-        $cors = $r.Headers["Access-Control-Allow-Origin"]
-        if (-not $cors) {
-            throw "Endpoint reachable but missing Access-Control-Allow-Origin header. Upload server/.htaccess next to quotes.json on the host."
-        }
-
-        try {
-            $payload = $r.Content | ConvertFrom-Json
-        } catch {
-            throw "Endpoint returned invalid JSON"
-        }
-
-        $entries = if ($payload -is [System.Array]) { $payload } elseif ($payload.prayers) { $payload.prayers } else { @() }
-        if ($entries.Count -lt 1) { throw "Endpoint returned no prayers" }
-
-        "HTTP 200, CORS=$cors, $($entries.Count) prayers"
-    }
-} else {
-    $summary["Probe remote endpoint"] = "skipped"
 }
 
 if (-not $SkipPagesProbe) {

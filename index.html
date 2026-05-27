@@ -48,26 +48,6 @@
 
           <div class="library-body">
             <aside class="library-list-pane" aria-label="Local prayer library">
-              <section class="library-source" aria-label="Prayer source">
-                <div class="library-source-row">
-                  <span class="library-source-label">Showing</span>
-                  <div class="library-source-toggle" role="group" aria-label="Prayer source">
-                    <button id="librarySourceLocal" type="button">Saved</button>
-                    <button id="librarySourceRemote" type="button">Live URL</button>
-                  </div>
-                </div>
-                <p class="library-source-summary" id="librarySourceSummary">Saved prayers on this device.</p>
-                <form class="library-remote-form" id="libraryRemoteForm" hidden>
-                  <input id="libraryRemoteEndpoint" type="url" autocomplete="off" placeholder="https://.../quotes.json">
-                  <button class="library-tool-button library-refresh-button" id="libraryRemoteRefresh" type="submit" aria-label="Use live source" data-tooltip="Apply this live JSON source">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="m5 12 4 4L19 6"></path>
-                    </svg>
-                    <span>Use</span>
-                  </button>
-                </form>
-              </section>
-
               <div class="library-actions">
                 <button class="library-tool-button" id="libraryNew" type="button" aria-label="New local prayer" data-tooltip="Create a new local prayer">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -185,6 +165,6 @@
     </main>
 
     <script src="particles.js"></script>
-    <script src="script.js?v=20260523-light-mode"></script>
+    <script src="script.js?v=20260527-local-only"></script>
   </body>
 </html>

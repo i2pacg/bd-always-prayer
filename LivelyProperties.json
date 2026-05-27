@@ -40,6 +40,28 @@
     "help": "Shows optional title and source metadata from the active prayers.",
     "value": true
   },
+  "libraryLabel": {
+    "type": "label",
+    "value": "Local Prayer Library"
+  },
+  "localLibraryJson": {
+    "text": "Prayers JSON",
+    "type": "textbox",
+    "help": "Paste a JSON array or {\"prayers\": [...]} export, then click Apply prayers JSON. The in-wallpaper editor is friendlier for everyday edits.",
+    "value": "{\"version\":1,\"prayers\":[{\"lines\":[\"لَا إِلَٰهَ إِلَّا اللَّهُ الْعَظِيمُ الْحَلِيمُ\",\"لَا إِلَٰهَ إِلَّا اللَّهُ رَبُّ الْعَرْشِ الْعَظِيمِ\",\"لَا إِلَٰهَ إِلَّا اللَّهُ رَبُّ السَّمَاوَاتِ وَرَبُّ الْأَرْضِ وَرَبُّ الْعَرْشِ الْكَرِيم\"],\"title\":\"دعاء الكرب\",\"lang\":\"ar\",\"dir\":\"rtl\"},{\"lines\":[\"God grant me the serenity\",\"to accept the things I cannot change;\",\"courage to change the things I can;\",\"and wisdom to know the difference.\"],\"title\":\"Serenity Prayer\",\"lang\":\"en\",\"dir\":\"ltr\"},{\"lines\":[\"لِيُنفِقْ ذُو سَعَةٍ مِّن سَعَتِهِ ۖ\",\"وَمَن قُدِرَ عَلَيْهِ رِزْقُهُ\",\"فَلْيُنفِقْ مِمَّا آتَاهُ اللَّهُ ۚ\",\"لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا مَا آتَاهَا ۚ\",\"سَيَجْعَلُ اللَّهُ بَعْدَ عُسْرٍ يُسْرًا (7)\"],\"title\":\"سورة الطلاق\",\"lang\":\"ar\",\"dir\":\"rtl\"}]}"
+  },
+  "applyLocalLibraryJson": {
+    "text": "Apply prayers JSON",
+    "type": "button",
+    "help": "Replace the saved local library with the JSON above.",
+    "value": "Apply"
+  },
+  "resetLocalLibraryJson": {
+    "text": "Reset to bundled defaults",
+    "type": "button",
+    "help": "Replace the saved local library with the packaged quotes.json defaults.",
+    "value": "Reset"
+  },
   "backgroundLabel": {
     "type": "label",
     "value": "Background"

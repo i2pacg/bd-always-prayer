@@ -671,71 +671,13 @@ body.theme-light.library-open .library-toggle {
 
 .library-list-pane {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 14px;
   min-height: 0;
   padding: 18px;
   border-right: 1px solid rgba(246, 246, 238, 0.09);
   overflow: visible;
   overscroll-behavior: contain;
-}
-
-.library-source {
-  display: grid;
-  gap: 8px;
-  padding: 0 0 2px;
-}
-
-.library-source-row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-}
-
-.library-source-label {
-  color: rgba(236, 236, 228, 0.58);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.library-source-summary {
-  margin: 0;
-  color: rgba(236, 236, 228, 0.48);
-  font-size: 11px;
-  line-height: 1.45;
-}
-
-.library-source-toggle {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 3px;
-  min-width: 0;
-  padding: 3px;
-  border: 1px solid rgba(246, 246, 238, 0.08);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.library-source-toggle button {
-  min-height: 30px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: rgba(248, 248, 241, 0.62);
-  cursor: pointer;
-  font-family: "Montserrat Local", "Segoe UI", sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.library-source-toggle button:hover,
-.library-source-toggle button:focus-visible,
-.library-source-toggle button.is-active {
-  background: rgba(177, 211, 204, 0.12);
-  color: rgba(248, 248, 241, 0.95);
 }
 
 .library-submit-row {
@@ -850,42 +792,6 @@ body.theme-light.library-open .library-toggle {
   color: rgba(255, 205, 192, 0.9);
 }
 
-.library-remote-form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 84px;
-  gap: 8px;
-}
-
-.library-remote-form[hidden] {
-  display: none;
-}
-
-.library-remote-form input {
-  width: 100%;
-  height: 36px;
-  min-width: 0;
-  padding: 0 11px;
-  caret-color: rgba(248, 248, 241, 0.92);
-  border: 1px solid rgba(246, 246, 238, 0.12);
-  border-radius: 8px;
-  outline: none;
-  background: rgba(255, 255, 255, 0.045);
-  color: rgba(248, 248, 241, 0.9);
-  font-family: "Montserrat Local", "Segoe UI", sans-serif;
-  font-size: 12px;
-  pointer-events: auto;
-  user-select: text;
-}
-
-.library-remote-form input:focus {
-  border-color: rgba(177, 211, 204, 0.42);
-  background: rgba(255, 255, 255, 0.065);
-}
-
-.library-refresh-button {
-  padding: 0 9px;
-}
-
 .library-list {
   display: grid;
   align-content: start;
@@ -979,8 +885,7 @@ body.theme-light.library-open .library-toggle {
 }
 
 .library-form input,
-.library-form textarea,
-.library-remote-form input {
+.library-form textarea {
   cursor: text;
 }
 
@@ -1008,7 +913,6 @@ body.theme-light.library-open .library-toggle {
 .library-close:focus-visible,
 .library-list button:focus-visible,
 .library-tool-button:focus-visible,
-.library-source-toggle button:focus-visible,
 .library-submit-row button:focus-visible,
 .library-choice button:focus-visible {
   outline: 2px solid rgba(177, 211, 204, 0.5);
@@ -1181,12 +1085,10 @@ body.theme-light .library-list-pane {
 body.theme-light .library-header p,
 body.theme-light .library-empty,
 body.theme-light .library-status,
-body.theme-light .library-source-label,
 body.theme-light .library-form label span {
   color: rgba(54, 66, 62, 0.58);
 }
 
-body.theme-light .library-source-summary,
 body.theme-light .library-list-lines,
 body.theme-light .library-preview-meta,
 body.theme-light .library-choice-card p {
@@ -1200,9 +1102,7 @@ body.theme-light .library-tool-button,
 body.theme-light .library-form input,
 body.theme-light .library-form select,
 body.theme-light .library-form textarea,
-body.theme-light .library-remote-form input,
 body.theme-light .library-choice-actions button,
-body.theme-light .library-source-toggle,
 body.theme-light .library-list button,
 body.theme-light .library-preview {
   border-color: rgba(28, 38, 34, 0.12);
@@ -1224,20 +1124,12 @@ body.theme-light .library-submit-row button:focus-visible,
 body.theme-light .library-tool-button:focus-visible,
 body.theme-light .library-form input:focus,
 body.theme-light .library-form select:focus,
-body.theme-light .library-form textarea:focus,
-body.theme-light .library-remote-form input:focus {
+body.theme-light .library-form textarea:focus {
   border-color: rgba(70, 130, 124, 0.28);
   background: rgba(255, 255, 255, 0.82);
   color: rgba(22, 30, 28, 0.96);
 }
 
-body.theme-light .library-source-toggle button {
-  color: rgba(54, 66, 62, 0.62);
-}
-
-body.theme-light .library-source-toggle button:hover,
-body.theme-light .library-source-toggle button:focus-visible,
-body.theme-light .library-source-toggle button.is-active,
 body.theme-light .library-list button:hover,
 body.theme-light .library-list button:focus-visible,
 body.theme-light .library-list button.is-active,
@@ -1316,17 +1208,6 @@ body.theme-light #libraryChoicePrimary.is-danger {
 
   .library-preview-text {
     font-size: 19px;
-  }
-}
-
-@media (max-width: 430px) {
-  .library-source-row {
-    grid-template-columns: 1fr;
-    gap: 7px;
-  }
-
-  .library-remote-form {
-    grid-template-columns: 1fr;
   }
 }
 

@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-All%20rights%20reserved-lightgrey)](LivelyInfo.json)
 [![Last commit](https://img.shields.io/github/last-commit/i2pacg/bd-always-prayer?color=informational)](https://github.com/i2pacg/bd-always-prayer/commits/master)
 
-Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister/lively). It rotates Arabic and English prayers over an animated gradient with dark and light themes, an adaptive particle field, exact line control, self-hosted fonts, optional remote data, and an in-wallpaper editor for the local prayer library.
+Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister/lively). It rotates Arabic and English prayers over an animated gradient with dark and light themes, an adaptive particle field, exact line control, self-hosted fonts, and a local prayer library that can be edited inside the wallpaper or through Lively Customize.
 
 **Live preview:** <https://i2pacg.github.io/bd-always-prayer/?preview=1>
 
@@ -18,12 +18,12 @@ Minimal prayer wallpaper for [Lively Wallpaper](https://github.com/rocksdanister
 
 Use this when you want the full Lively **Customize** panel.
 
-1. Download the latest release zip: [bd-always-prayer-lively.zip](https://github.com/i2pacg/bd-always-prayer/releases/latest/download/bd-always-prayer-lively.zip) <!-- zip-size --> 469.5 KB <!-- /zip-size -->
+1. Download the latest release zip: [bd-always-prayer-lively.zip](https://github.com/i2pacg/bd-always-prayer/releases/latest/download/bd-always-prayer-lively.zip) <!-- zip-size --> 469.9 KB <!-- /zip-size -->
 2. Drag the zip into Lively.
 3. Select **bd-always-prayer** in the Lively library.
 4. Right-click the wallpaper and open **Customize**.
 
-This keeps visual controls: quote interval, text scale, theme, palette, particles, background brightness, and animation.
+This keeps visual controls plus the local prayer-library JSON control: quote interval, text scale, theme, palette, particles, background brightness, animation, and prayer import/reset from Lively Customize.
 
 ### Updates and releases
 
@@ -37,13 +37,26 @@ To update a zip install, download the newer zip and drag it into Lively again. I
 
 ### Changelog
 
+**Unreleased - Local-only library**
+
+- Removed online prayer loading and all live source controls.
+- The wallpaper now rotates only the saved local library.
+- Lively Customize now has a local prayers JSON textbox with Apply and Reset buttons.
+- The top-right in-wallpaper editor remains the friendly way to add, edit, delete, import, and export prayers.
+- The ship pipeline no longer checks any prayer endpoint.
+
+**v1.0.1 - Simpler installs and controls**
+
+- GitHub Releases became the main user-facing download place.
+- The local library panel was simplified so prayer management happens in one place.
+- Dark and light themes remained available through Lively Customize and the Pages preview.
+
 **v1.0.0 - First public release**
 
 - Elegant prayer wallpaper for Lively with Arabic and English text rotation.
 - Dark and light themes with animated gradients and adaptive particles.
 - Self-hosted Scheherazade New and Montserrat fonts.
 - Local saved-prayer editor with exact line breaks, metadata, import/export, and clear-all.
-- Live JSON source option for `https://prayer.ibrahimomer.net/quotes.json`.
 - GitHub Pages browser preview with preview-only visual controls.
 - Versioned release zip for Lively installs.
 
@@ -78,17 +91,16 @@ Zip installs expose these through Lively's Customize panel:
 | Background | Theme, motion, palette intensity, palette mode, brightness |
 | Particles | Density and glow |
 | Motion | Animation on/off |
+| Local library | Prayers JSON, apply JSON, reset to bundled defaults |
 
 Settings are defined in [`LivelyProperties.json`](LivelyProperties.json).
 
-Prayer source settings live inside the wallpaper panel, not in Lively Customize. This avoids split control between zip installs and URL installs.
+The wallpaper has one prayer source: the saved local library. Lively Customize can replace that local library from JSON, and the in-wallpaper panel can edit it directly.
 
 ### Local library inside the wallpaper
 
 The small top-right control opens the local library editor. On first run, it reads the bundled [`quotes.json`](quotes.json), loads those prayers into the editor, and saves that editable copy in browser storage. From there, you can build on it directly.
 
-- Choose what shows: saved prayers or a live JSON URL plus saved prayers.
-- Edit the live JSON URL from the same panel.
 - Edit prayers that originally came from `quotes.json`.
 - Add a new local prayer.
 - Delete local prayers.
@@ -108,19 +120,25 @@ bdAlwaysPrayer.localLibrary.v1
 
 This storage is expected to survive normal app and machine restarts. It is still browser storage, so it can be lost if Lively/CEF storage is cleared, the wallpaper is installed under a different origin, or the wallpaper is reinstalled in a way that changes its storage identity. Use export/import before reinstalling or moving machines.
 
-When **Showing** is set to saved, the wallpaper rotates this editable local library. When **Showing** is set to live URL, that endpoint is used first and saved prayers are appended after it.
+The wallpaper rotates this editable local library only.
 
 The import buttons are intentionally simple: default import reads bundled `quotes.json`, and file import reads JSON from the machine. Every import asks whether to replace the current local library or add to it.
 
 Static HTML cannot rewrite the packaged `quotes.json` from inside Lively. The editor reads it as the seed and then persists edits in browser storage.
 
+### Local library from Lively Customize
+
+Zip installs also expose **Prayers JSON** in Lively Customize. Paste either a raw array or a wrapper shaped like `{ "prayers": [...] }`, then click **Apply prayers JSON**. This replaces the saved local library with the pasted prayers.
+
+The in-wallpaper editor's **Export** button produces the same wrapper shape, so it can be pasted back into Lively Customize later. **Reset to bundled defaults** replaces the saved library with the packaged `quotes.json` prayers.
+
+Lively sends property values to the page, but the page cannot write back into Lively's Customize textbox. Edits made inside the wallpaper still update the active saved local library immediately; export them when you want a copy outside the wallpaper.
+
 ---
 
-## Prayer Sources
+## Local Prayer Data
 
-### Bundled source
-
-The packaged local library lives in [`quotes.json`](quotes.json). Each item can use `text` for natural wrapping or `lines` for exact authored line breaks:
+The packaged seed library lives in [`quotes.json`](quotes.json). Each item can use `text` for natural wrapping or `lines` for exact authored line breaks:
 
 ```json
 {
@@ -136,44 +154,6 @@ The packaged local library lives in [`quotes.json`](quotes.json). Each item can 
 ```
 
 Use `lines` for Quran verses, prayers, or anything where sentence flow needs deliberate line endings.
-
-### Remote endpoint
-
-The default remote source is:
-
-```text
-https://prayer.ibrahimomer.net/quotes.json
-```
-
-The endpoint may return a raw array:
-
-```json
-[
-  { "lines": ["..."], "title": "...", "lang": "ar", "dir": "rtl" }
-]
-```
-
-Or a wrapped object:
-
-```json
-{
-  "version": 1,
-  "updatedAt": "2026-05-20T00:00:00Z",
-  "prayers": [
-    { "lines": ["..."], "title": "...", "source": "...", "lang": "ar", "dir": "rtl" }
-  ]
-}
-```
-
-Remote means remote: if the endpoint fails, the wallpaper shows a clear error instead of silently falling back to local data.
-
-For cross-origin loading, the host must send:
-
-```http
-Access-Control-Allow-Origin: *
-```
-
-[`server/.htaccess`](server/.htaccess) contains the Apache/LiteSpeed headers used for `prayer.ibrahimomer.net`.
 
 ---
 
@@ -228,7 +208,7 @@ The server is only for browser preview. Lively runs the packaged HTML directly.
 # Full local ship pipeline.
 npm run ship
 
-# Same build, but skip remote and GitHub Pages probes.
+# Same build, but skip the GitHub Pages probe.
 npm run ship:offline
 
 # Just rebuild the Lively zip.
@@ -244,12 +224,11 @@ npm run release:github -- -Version v1.2.3
 
 `npm run ship` runs:
 
-1. JSON validation and `script.js` syntax check.
+1. JSON validation, `script.js` syntax check, and local-only source check.
 2. Referenced asset check for `index.html` and `styles.css`.
-3. Remote endpoint probe for HTTP 200, CORS, and valid prayer data.
-4. GitHub Pages published-asset probe.
-5. Lively zip build.
-6. README zip-size stamp.
+3. GitHub Pages published-asset probe.
+4. Lively zip build.
+5. README zip-size stamp.
 
 If GitHub Pages has not published yet or is unavailable, use `npm run ship:offline` for local packaging and run the full command again once Pages is healthy.
 
@@ -295,7 +274,6 @@ LivelyInfo.json          Lively metadata.
 LivelyProperties.json    Lively Customize panel definition.
 assets/fonts/            Self-hosted Scheherazade New and Montserrat.
 assets/preview/          Lively thumbnail and preview images.
-server/.htaccess         CORS and no-cache config for remote JSON hosting.
 scripts/                 Validation, ship, and package scripts.
 dist/                    Built Lively zip.
 ```

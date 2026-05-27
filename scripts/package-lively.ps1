@@ -50,6 +50,22 @@ if ($Info.Type -ne 1) {
     throw "LivelyInfo.json Type must be 1 for a web wallpaper."
 }
 
+$Properties = Read-JsonFile "LivelyProperties.json"
+if (-not ($Properties.PSObject.Properties.Name -contains "localLibraryJson")) {
+    throw "LivelyProperties.json must include localLibraryJson for local prayer editing."
+}
+
+try {
+    $livelyLibrary = $Properties.localLibraryJson.value | ConvertFrom-Json
+} catch {
+    throw "LivelyProperties.json localLibraryJson value must be valid JSON."
+}
+
+$livelyEntries = if ($livelyLibrary -is [System.Array]) { $livelyLibrary } elseif ($livelyLibrary.prayers) { $livelyLibrary.prayers } else { @() }
+if ($livelyEntries.Count -lt 1) {
+    throw "LivelyProperties.json localLibraryJson must include at least one prayer."
+}
+
 $Quotes = Read-JsonFile "quotes.json"
 if ($Quotes.Count -lt 1) {
     throw "quotes.json must contain at least one quote."
@@ -64,9 +80,9 @@ for ($Index = 0; $Index -lt $Quotes.Count; $Index++) {
     }
 }
 
-Read-JsonFile "LivelyProperties.json" | Out-Null
 node --check (Join-Path $Root "script.js") | Out-Null
 node --check (Join-Path $Root "preview-controls.js") | Out-Null
+& (Join-Path $PSScriptRoot "validate-local-only.ps1") | Out-Null
 
 Write-Output "Validation passed."
 

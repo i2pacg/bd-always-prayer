@@ -1,15 +1,16 @@
 {
   "name": "bd-always-prayer",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "private": true,
   "description": "Minimal Lively Wallpaper prayer and reflection web wallpaper.",
   "scripts": {
     "validate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lively.ps1 -ValidateOnly",
+    "validate:local-only": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/validate-local-only.ps1",
     "package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-lively.ps1",
     "release": "npm run package",
     "release:github": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release-github.ps1",
     "ship": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1",
-    "ship:offline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1 -SkipRemoteProbe -SkipPagesProbe"
+    "ship:offline": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1 -SkipPagesProbe"
   },
   "devDependencies": {}
 }

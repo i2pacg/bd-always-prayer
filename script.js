@@ -4,7 +4,7 @@ const quoteMeta = document.getElementById("quoteMeta");
 const errorState = document.getElementById("errorState");
 const errorMessage = document.getElementById("errorMessage");
 let syncPreviewControls = function syncPreviewControlsNoop() {};
-const PREVIEW_ASSET_VERSION = "20260523-light-mode";
+const PREVIEW_ASSET_VERSION = "20260527-local-only";
 const libraryToggle = document.getElementById("libraryToggle");
 const libraryPanel = document.getElementById("libraryPanel");
 const librarySheet = document.getElementById("librarySheet");
@@ -13,11 +13,6 @@ const libraryClose = document.getElementById("libraryClose");
 const libraryList = document.getElementById("libraryList");
 const libraryEmpty = document.getElementById("libraryEmpty");
 const libraryCount = document.getElementById("libraryCount");
-const librarySourceSummary = document.getElementById("librarySourceSummary");
-const librarySourceLocal = document.getElementById("librarySourceLocal");
-const librarySourceRemote = document.getElementById("librarySourceRemote");
-const libraryRemoteForm = document.getElementById("libraryRemoteForm");
-const libraryRemoteEndpoint = document.getElementById("libraryRemoteEndpoint");
 const libraryForm = document.getElementById("libraryForm");
 const libraryEntryId = document.getElementById("libraryEntryId");
 const libraryEntryTitle = document.getElementById("libraryEntryTitle");
@@ -45,11 +40,10 @@ const libraryChoicePrimary = document.getElementById("libraryChoicePrimary");
 
 const arabicPattern = /[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\ufb50-\ufdff\ufe70-\ufeff]/;
 const localLibraryStorageKey = "bdAlwaysPrayer.localLibrary.v1";
-const sourceSettingsStorageKey = "bdAlwaysPrayer.sourceSettings.v1";
+const livelyLibraryHashStorageKey = "bdAlwaysPrayer.livelyLibraryHash.v1";
 const legacySavedPrayersStorageKey = "bdAlwaysPrayer.savedPrayers.v1";
 
 const state = {
-  quotes: [],
   localSeedQuotes: [],
   savedPrayers: [],
   selectedSavedPrayerId: "",
@@ -68,16 +62,17 @@ const state = {
     particleGlow: 62,
     textOpacity: 0.94,
     showMetadata: true,
-    dataSource: 0,
-    remoteEndpoint: "https://prayer.ibrahimomer.net/quotes.json",
-    remoteRefreshMinutes: 15,
     enableAnimation: true
   },
-  refreshTimer: null,
   activeQuotes: [],
   lastFocusedElement: null,
   pendingChoice: null,
-  activeEditorControl: null
+  activeEditorControl: null,
+  livelyLibraryJson: "",
+  localLibraryReady: false,
+  hadPersistedLocalLibraryAtBoot: false,
+  livelyLibraryJsonInitialized: false,
+  livelyButtonsReady: false
 };
 
 const paletteClasses = ["palette-spectrum", "palette-graphite", "palette-teal", "palette-violet", "palette-emerald"];
@@ -168,90 +163,6 @@ function normalizeQuotePayload(data, sourceName) {
 
 async function loadLocalQuotes() {
   return normalizeQuotePayload(await fetchJson("quotes.json"), "quotes.json");
-}
-
-async function loadRemoteQuotes() {
-  const endpoint = state.settings.remoteEndpoint.trim();
-  if (!endpoint) {
-    throw new Error("Remote endpoint URL is empty.");
-  }
-
-  return normalizeQuotePayload(await fetchJson(endpoint), endpoint);
-}
-
-async function loadQuotes() {
-  return state.settings.dataSource === 1 ? loadRemoteQuotes() : [];
-}
-
-function loadSourceSettings() {
-  try {
-    const raw = window.localStorage.getItem(sourceSettingsStorageKey);
-    if (!raw) {
-      return;
-    }
-
-    const parsed = JSON.parse(raw);
-    state.settings.dataSource = parsed && Number(parsed.dataSource) === 1 ? 1 : 0;
-    if (typeof parsed.remoteEndpoint === "string" && parsed.remoteEndpoint.trim()) {
-      state.settings.remoteEndpoint = parsed.remoteEndpoint.trim();
-    }
-    if (Number.isFinite(Number(parsed.remoteRefreshMinutes))) {
-      state.settings.remoteRefreshMinutes = Math.max(0, Number(parsed.remoteRefreshMinutes));
-    }
-  } catch (error) {
-    setLibraryStatus(error instanceof Error ? error.message : String(error), true);
-  }
-}
-
-function persistSourceSettings() {
-  window.localStorage.setItem(sourceSettingsStorageKey, JSON.stringify({
-    version: 1,
-    dataSource: state.settings.dataSource,
-    remoteEndpoint: state.settings.remoteEndpoint,
-    remoteRefreshMinutes: state.settings.remoteRefreshMinutes,
-    updatedAt: new Date().toISOString()
-  }, null, 2));
-}
-
-function renderSourceControls() {
-  const isRemote = state.settings.dataSource === 1;
-
-  librarySourceSummary.textContent = isRemote ? "Live URL first, saved prayers after." : "Saved prayers on this device.";
-  librarySourceLocal.classList.toggle("is-active", !isRemote);
-  librarySourceLocal.setAttribute("aria-pressed", String(!isRemote));
-  librarySourceRemote.classList.toggle("is-active", isRemote);
-  librarySourceRemote.setAttribute("aria-pressed", String(isRemote));
-  libraryRemoteForm.hidden = !isRemote;
-  libraryRemoteEndpoint.value = state.settings.remoteEndpoint;
-}
-
-async function setPrayerSource(source) {
-  const nextSource = source === "remote" ? 1 : 0;
-  if (state.settings.dataSource === nextSource) {
-    renderSourceControls();
-    return;
-  }
-
-  state.settings.dataSource = nextSource;
-  persistSourceSettings();
-  renderSourceControls();
-  await reloadQuotes();
-}
-
-async function refreshRemoteSourceFromForm() {
-  const endpoint = libraryRemoteEndpoint.value.trim();
-  if (!endpoint) {
-    setLibraryStatus("Remote endpoint URL is empty.", true);
-    focusEditableControl(libraryRemoteEndpoint);
-    return;
-  }
-
-  state.settings.remoteEndpoint = endpoint;
-  state.settings.dataSource = 1;
-  persistSourceSettings();
-  renderSourceControls();
-  await reloadQuotes();
-  setLibraryStatus("Live source updated.");
 }
 
 function createPrayerId() {
@@ -380,8 +291,7 @@ function persistSavedPrayers() {
 }
 
 function getActiveQuotes() {
-  const savedQuotes = state.savedPrayers.map(savedPrayerToQuote);
-  return state.settings.dataSource === 1 ? state.quotes.concat(savedQuotes) : savedQuotes;
+  return state.savedPrayers.map(savedPrayerToQuote);
 }
 
 function refreshActiveLibrary() {
@@ -391,7 +301,7 @@ function refreshActiveLibrary() {
 
   state.activeQuotes = getActiveQuotes();
   if (state.activeQuotes.length === 0) {
-    showError(new Error("No prayers are available. Add at least one saved prayer or load a prayer source."));
+    showError(new Error("No local prayers are available. Add one prayer or import the defaults."));
     return;
   }
 
@@ -414,7 +324,6 @@ function syncLibraryAfterMutation() {
 function showError(error) {
   state.isReady = false;
   clearTimer();
-  clearRefreshTimer();
   quoteStage.hidden = true;
   errorState.hidden = false;
   errorMessage.textContent = error instanceof Error ? error.message : String(error);
@@ -428,7 +337,6 @@ function showQuotes() {
   state.index = Math.min(state.index, state.activeQuotes.length - 1);
   renderQuote(state.index, false);
   restartTimer();
-  restartRefreshTimer();
 }
 
 function clearTimer() {
@@ -436,22 +344,6 @@ function clearTimer() {
     window.clearInterval(state.timer);
     state.timer = null;
   }
-}
-
-function clearRefreshTimer() {
-  if (state.refreshTimer) {
-    window.clearInterval(state.refreshTimer);
-    state.refreshTimer = null;
-  }
-}
-
-function restartRefreshTimer() {
-  clearRefreshTimer();
-  if (state.settings.dataSource !== 1 || state.settings.remoteRefreshMinutes <= 0) {
-    return;
-  }
-
-  state.refreshTimer = window.setInterval(reloadQuotes, state.settings.remoteRefreshMinutes * 60 * 1000);
 }
 
 function getMetaText(quote) {
@@ -748,8 +640,7 @@ function installEditableFocusBridge() {
     libraryEntrySource,
     libraryEntryLang,
     libraryEntryDir,
-    libraryEntryLines,
-    libraryRemoteEndpoint
+    libraryEntryLines
   ];
 
   editableControls.forEach((control) => {
@@ -1013,8 +904,152 @@ function importLibraryEntries(entries, statusPrefix, mode = "add") {
   setLibraryStatus(`${statusPrefix} ${imported.length} prayer${imported.length === 1 ? "" : "s"}.`);
 }
 
+function replaceLocalLibrary(entries, statusMessage) {
+  const imported = normalizeImportEntries(entries);
+  const now = new Date().toISOString();
+
+  state.savedPrayers = imported.map((entry) => ({
+    ...entry,
+    updatedAt: now
+  }));
+  persistSavedPrayers();
+  fillLibraryForm(state.savedPrayers[0] || null);
+  syncLibraryAfterMutation();
+
+  if (statusMessage) {
+    setLibraryStatus(statusMessage);
+  }
+
+  return imported.length;
+}
+
 function getImportEntries(data) {
   return Array.isArray(data) ? data : data && Array.isArray(data.prayers) ? data.prayers : [];
+}
+
+function parseLocalLibraryJson(value, sourceName) {
+  const parsed = JSON.parse(value);
+  const entries = getImportEntries(parsed);
+  if (entries.length === 0) {
+    throw new Error(`${sourceName} has no prayers.`);
+  }
+
+  return normalizeImportEntries(entries);
+}
+
+function hasPersistedLocalLibrary() {
+  return Boolean(window.localStorage.getItem(localLibraryStorageKey)
+    || window.localStorage.getItem(legacySavedPrayersStorageKey));
+}
+
+function rememberLivelyLibraryJson(value) {
+  if (value.trim()) {
+    window.localStorage.setItem(livelyLibraryHashStorageKey, hashString(value.trim()));
+  }
+}
+
+function applyLivelyLocalLibrary(options = {}) {
+  const value = state.livelyLibraryJson.trim();
+  const sourceName = "Lively local library JSON";
+  if (!value) {
+    if (!options.silent) {
+      setLibraryStatus(`${sourceName} is empty.`, true);
+    }
+    return false;
+  }
+
+  const nextHash = hashString(value);
+  const previousHash = window.localStorage.getItem(livelyLibraryHashStorageKey);
+  const hasExistingLibrary = options.reason === "boot"
+    ? state.hadPersistedLocalLibraryAtBoot
+    : hasPersistedLocalLibrary();
+
+  if (options.reason === "boot") {
+    if (hasExistingLibrary && !previousHash) {
+      window.localStorage.setItem(livelyLibraryHashStorageKey, nextHash);
+      return false;
+    }
+
+    if (hasExistingLibrary && previousHash === nextHash) {
+      return false;
+    }
+  }
+
+  try {
+    const entries = parseLocalLibraryJson(value, sourceName);
+    const count = replaceLocalLibrary(
+      entries,
+      options.silent ? "" : `Applied ${entries.length} prayer${entries.length === 1 ? "" : "s"} from Lively Customize.`
+    );
+    window.localStorage.setItem(livelyLibraryHashStorageKey, nextHash);
+    return count > 0;
+  } catch (error) {
+    if (!options.silent) {
+      setLibraryStatus(error instanceof Error ? error.message : String(error), true);
+    }
+    return false;
+  }
+}
+
+function applyPendingLivelyLibraryOnBoot() {
+  if (!state.localLibraryReady || !state.livelyLibraryJsonInitialized) {
+    return;
+  }
+
+  applyLivelyLocalLibrary({ reason: "boot", silent: true });
+}
+
+function resetLocalLibraryToDefaults() {
+  const defaults = state.localSeedQuotes.map(quoteToSavedPrayer);
+  if (defaults.length === 0) {
+    setLibraryStatus("No bundled defaults are available.", true);
+    return;
+  }
+
+  const count = replaceLocalLibrary(
+    defaults,
+    `Reset to ${defaults.length} bundled prayer${defaults.length === 1 ? "" : "s"}.`
+  );
+  if (count > 0) {
+    rememberLivelyLibraryJson(state.livelyLibraryJson);
+  }
+}
+
+function shouldHandleLivelyButton() {
+  if (!state.livelyButtonsReady) {
+    return false;
+  }
+
+  return true;
+}
+
+function handleLocalLibrarySetting(name, value) {
+  if (name === "localLibraryJson") {
+    const wasInitialized = state.livelyLibraryJsonInitialized;
+    state.livelyLibraryJson = typeof value === "string" ? value : String(value || "");
+    state.livelyLibraryJsonInitialized = true;
+
+    if (!wasInitialized) {
+      applyPendingLivelyLibraryOnBoot();
+      return;
+    }
+
+    setLibraryStatus("Lively library JSON changed. Press Apply in Lively Customize.");
+    return;
+  }
+
+  if (name === "applyLocalLibraryJson") {
+    if (shouldHandleLivelyButton()) {
+      applyLivelyLocalLibrary();
+    }
+    return;
+  }
+
+  if (name === "resetLocalLibraryJson") {
+    if (shouldHandleLivelyButton()) {
+      resetLocalLibraryToDefaults();
+    }
+  }
 }
 
 function askImportMode(options) {
@@ -1105,29 +1140,16 @@ function closeLibraryPanel() {
 }
 
 function initLibraryManager() {
+  state.hadPersistedLocalLibraryAtBoot = hasPersistedLocalLibrary();
   state.savedPrayers = readSavedPrayers();
   persistSavedPrayers();
-  renderSourceControls();
   fillLibraryForm(state.savedPrayers[0] || null);
+  state.localLibraryReady = true;
+  applyPendingLivelyLibraryOnBoot();
 
   libraryToggle.addEventListener("click", openLibraryPanel);
   libraryBackdrop.addEventListener("click", closeLibraryPanel);
   libraryClose.addEventListener("click", closeLibraryPanel);
-  librarySourceLocal.addEventListener("click", () => {
-    setPrayerSource("local").catch((error) => showError(error));
-  });
-  librarySourceRemote.addEventListener("click", () => {
-    setPrayerSource("remote").catch((error) => showError(error));
-  });
-  libraryRemoteForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    refreshRemoteSourceFromForm().catch((error) => showError(error));
-  });
-  libraryRemoteEndpoint.addEventListener("change", () => {
-    state.settings.remoteEndpoint = libraryRemoteEndpoint.value.trim() || state.settings.remoteEndpoint;
-    persistSourceSettings();
-    renderSourceControls();
-  });
   libraryNew.addEventListener("click", () => {
     fillLibraryForm(null);
     focusPrimaryEditorField(true);
@@ -1189,30 +1211,17 @@ function handleResize() {
 
 async function start() {
   try {
-    loadSourceSettings();
     applySettings();
     state.localSeedQuotes = await loadLocalQuotes();
     initLibraryManager();
-    state.quotes = await loadQuotes();
     showQuotes();
+    window.setTimeout(() => {
+      state.livelyButtonsReady = true;
+    }, 1000);
     window.addEventListener("resize", handleResize);
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(fitQuote);
     }
-  } catch (error) {
-    showError(error);
-  }
-}
-
-async function reloadQuotes() {
-  try {
-    clearTimer();
-    if (state.settings.dataSource !== 1) {
-      state.localSeedQuotes = await loadLocalQuotes();
-    }
-    state.quotes = await loadQuotes();
-    state.index = 0;
-    showQuotes();
   } catch (error) {
     showError(error);
   }
@@ -1266,9 +1275,10 @@ function applyControlSetting(name, value) {
     case "showMetadata":
       state.settings.showMetadata = toBoolean(value);
       break;
-    case "dataSource":
-    case "remoteEndpoint":
-    case "remoteRefreshMinutes":
+    case "localLibraryJson":
+    case "applyLocalLibraryJson":
+    case "resetLocalLibraryJson":
+      handleLocalLibrarySetting(name, value);
       return;
     case "enableAnimation":
       state.settings.enableAnimation = toBoolean(value);
